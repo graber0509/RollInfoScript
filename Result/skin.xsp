@@ -1,0 +1,57 @@
+<head type="xsp" version="1" />
+<objects name="layout_done.psd" width="1664" height="768" isCentered="true" isCheckJPG="false" isUseTextEffects="false" borderSize="0" >
+    <Group name="layer_top" x="0" y="0" size="10,10 " opacity="100" >
+        <AfterEffects name="ae_multiplayer" x="0" y="0" file="multiplayer" opacity="100" />
+        <AfterEffects name="ae_logo" x="0" y="0" file="logo" opacity="100" />
+    </Group>
+    <Sprite name="pos_skinMove_iphone" x="0" y="0" size="24,24" color="65,41,143" opacity="100" />
+    <Group name="GR_BUTTONS" x="-832" y="384" size="0,0 " opacity="100" >
+    </Group>
+    <Group name="GR_SKIN" x="0" y="0" size="1664,768 " opacity="100" >
+        <AfterEffects name="ae_anim" x="0" y="0" file="bg_base" opacity="100" />
+        <Sprite name="right" x="603" y="0" opacity="100" />
+        <Sprite name="top" x="0" y="315" opacity="100" />
+        <Sprite name="bottom" x="0" y="-317" opacity="100" />
+        <Sprite name="left" x="-603" y="0" opacity="100" />
+    </Group>
+    <Group name="GR_SKIN_FS" x="0" y="0" size="1664,768 " opacity="100" >
+        <AfterEffects name="ae_anim" x="0" y="0" file="bg_fs" opacity="100" />
+        <Sprite name="right_FS" x="603" y="0" opacity="100" />
+        <Sprite name="top_FS" x="0" y="315" opacity="100" />
+        <Sprite name="bottom_FS" x="0" y="-317" opacity="100" />
+        <Sprite name="left_FS" x="-603" y="0" opacity="100" />
+    </Group>
+    <Group name="OTHER_STUFF" x="-832" y="384" size="0,0 " opacity="100" >
+    </Group>
+    <Group name="LINES" x="-832" y="384" size="0,0 " opacity="100" >
+    </Group>
+    <Sprite name="layer_scatter_duo" x="0" y="-1" size="1176,520" color="255,255,255" opacity="0" />
+    <Sprite name="layer_scatter" x="0" y="-1" size="1176,520" color="255,255,255" opacity="0" />
+    <Group name="ACTIVE_ELEMENTS" x="-832" y="384" size="0,0 " opacity="100" >
+    </Group>
+    <Group name="GR_LINES" x="1" y="-1" size="514,500 " opacity="100" >
+        <Sprite name="line" x="256" y="-1" opacity="100" />
+        <Sprite name="line" x="86" y="-1" opacity="100" />
+        <Sprite name="line" x="-84" y="-1" opacity="100" />
+        <Sprite name="line" x="-254" y="-1" opacity="100" />
+    </Group>
+    <Group name="ROLLS" x="-3" y="-1" size="849,499 " opacity="100" >
+        <Group name="ROLLS_BUTTONS" x="-3" y="-1" size="849,499 " opacity="100" >
+            <Sprite name="area1" x="-3" y="-1" size="849,499" color="255,255,255" opacity="0" />
+        </Group>
+    </Group>
+    <Group name="fon" x="1" y="-2" size="850,500 " opacity="100" >
+        <Sprite name="item_fon" x="-339" y="-2" opacity="100" />
+        <Sprite name="item_fon" x="-169" y="-2" opacity="100" />
+        <Sprite name="item_fon" x="1" y="-2" opacity="100" />
+        <Sprite name="item_fon" x="171" y="-2" opacity="100" />
+        <Sprite name="item_fon" x="341" y="-2" opacity="100" />
+    </Group>
+    <Group name="fonFS" x="1" y="-2" size="850,500 " opacity="100" >
+        <Sprite name="item_fonFS" x="-339" y="-2" opacity="100" />
+        <Sprite name="item_fonFS" x="-169" y="-2" opacity="100" />
+        <Sprite name="item_fonFS" x="1" y="-2" opacity="100" />
+        <Sprite name="item_fonFS" x="171" y="-2" opacity="100" />
+        <Sprite name="item_fonFS" x="341" y="-2" opacity="100" />
+    </Group>
+</objects>

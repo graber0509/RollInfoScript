@@ -1,0 +1,39 @@
+<head type="xml" version="1"/>
+<rolls scale="1,1" pos="0,0">
+    <roll id="0" x="-228" y="-115" numElements="4" elementSize="110,80" stopIndex="1" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="1" x="-114" y="-115" numElements="4" elementSize="110,80" stopIndex="2" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="2" x="0" y="-115" numElements="4" elementSize="110,80" stopIndex="3" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="3" x="114" y="-115" numElements="4" elementSize="110,80" stopIndex="4" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="4" x="228" y="-115" numElements="4" elementSize="110,80" stopIndex="5" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+</rolls>
+
+<rollsFS scale="1,1" pos="0,0">
+    <roll id="0" x="-228" y="-115" numElements="4" elementSize="110,80" stopIndex="1" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="1" x="-114" y="-115" numElements="4" elementSize="110,80" stopIndex="2" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="2" x="0" y="-115" numElements="4" elementSize="110,80" stopIndex="3" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="3" x="114" y="-115" numElements="4" elementSize="110,80" stopIndex="4" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+    <roll id="4" x="228" y="-115" numElements="4" elementSize="110,80" stopIndex="5" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+</rollsFS>
+
+<rollsRespin scale="1,1" pos="0,0">
+    <roll id="0" x="-228" y="5" numElements="1" elementSize="110,80" stopIndex="1" scissorSize="112,80"/>
+	<roll id="1" x="-228" y="-75" numElements="1" elementSize="110,80" stopIndex="2" scissorSize="112,80"/>
+	<roll id="2" x="-228" y="-155" numElements="1" elementSize="110,80" stopIndex="3" scissorSize="112,80"/>
+	<roll id="3" x="-228" y="-235" numElements="1" elementSize="110,80" stopIndex="4" scissorSize="112,80"/>
+	<roll id="4" x="-114" y="5" numElements="1" elementSize="110,80" stopIndex="5" scissorSize="112,80"/>
+	<roll id="5" x="-114" y="-75" numElements="1" elementSize="110,80" stopIndex="6" scissorSize="112,80"/>
+	<roll id="6" x="-114" y="-155" numElements="1" elementSize="110,80" stopIndex="7" scissorSize="112,80"/>
+	<roll id="7" x="-114" y="-235" numElements="1" elementSize="110,80" stopIndex="8" scissorSize="112,80"/>
+	<roll id="8" x="0" y="5" numElements="1" elementSize="110,80" stopIndex="9" scissorSize="112,80"/>
+	<roll id="9" x="0" y="-75" numElements="1" elementSize="110,80" stopIndex="10" scissorSize="112,80"/>
+	<roll id="10" x="0" y="-155" numElements="1" elementSize="110,80" stopIndex="11" scissorSize="112,80"/>
+	<roll id="11" x="0" y="-235" numElements="1" elementSize="110,80" stopIndex="12" scissorSize="112,80"/>
+	<roll id="12" x="114" y="5" numElements="1" elementSize="110,80" stopIndex="13" scissorSize="112,80"/>
+	<roll id="13" x="114" y="-75" numElements="1" elementSize="110,80" stopIndex="14" scissorSize="112,80"/>
+	<roll id="14" x="114" y="-155" numElements="1" elementSize="110,80" stopIndex="15" scissorSize="112,80"/>
+	<roll id="15" x="114" y="-235" numElements="1" elementSize="110,80" stopIndex="16" scissorSize="112,80"/>
+	<roll id="16" x="228" y="5" numElements="1" elementSize="110,80" stopIndex="17" scissorSize="112,80"/>
+	<roll id="17" x="228" y="-75" numElements="1" elementSize="110,80" stopIndex="18" scissorSize="112,80"/>
+	<roll id="18" x="228" y="-155" numElements="1" elementSize="110,80" stopIndex="19" scissorSize="112,80"/>
+	<roll id="19" x="228" y="-235" numElements="1" elementSize="110,80" stopIndex="20" scissorSize="112,80"/>
+</rollsRespin>
