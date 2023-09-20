@@ -17,7 +17,7 @@ var C_SCRIPasdT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
      */
     var SCustomDataKeys = {
         m_nameSpace: "http://www.alcomi.com/",
-        m_prefix: "ananas:",
+        m_prefix: "ananssas:",
 
         m_isCentered: "isCentered",
         m_isCheckJPG: "isCheckJPG",
