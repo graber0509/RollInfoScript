@@ -1,7 +1,8 @@
-var fonSets = app.activeDocument.layerSets;
+alert(app.activeDocument.layerSets[9].artLayers[4].reflect.properties)
 
-var pathF = "C:/!MyRepos/RollInfoScript/Result/skin/aboba/loh/dcp"
-alert(pathF.replace(/\w+$/gi, ""));
+// var nameLayer = "fonRS";
+// alert(/^fon/gi.test(nameLayer));
+// alert(nameLayer.slice(3));
 
 // for (var i = 0; i < fonSets.length; i++) {
 //   if (/fonFS/.test(fonSets[i].name)) {
