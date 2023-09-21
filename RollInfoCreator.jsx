@@ -1,25 +1,36 @@
-alert(app.activeDocument.layerSets[9].artLayers[4].reflect.properties)
 
-// var nameLayer = "fonRS";
-// alert(/^fon/gi.test(nameLayer));
-// alert(nameLayer.slice(3));
+//   <roll id="0" x="-228" y="-115" numElements="4" elementSize="110,80" stopIndex="1" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
+var strPos = "x=\"-228\" y=\"-115\"";
+var rolls = "";
+var numElements = [110,80];
+//var elementSize = [110,80];
 
-// for (var i = 0; i < fonSets.length; i++) {
-//   if (/fonFS/.test(fonSets[i].name)) {
-//     for(var j = 0; j < fonSets[i].layers.length; j++) 
-//     {
-//         alert(calcCoordinates(fonSets[i].artLayers[j]));
-//     }  
-//   } 
-// }
+alert(typeof numElements == "string")
 
-// function calcCoordinates(layer) 
+
+  
+// function RespinRolls(strPos, numElements, elementSize) 
 // {
-//     var fonX_hor = layer.bounds[0];
-//     var fonY_hor = layer.bounds[2];
-//     var centerX = (fonX_hor+fonY_hor)/2;
+//     //Get Y value from reel
+//     var startPosY = Number(strPos.match(/y=\"(-*\d+)\"/)[1]);
+//     var strRs = "";
 
-//     var centerHor = centerX-(app.activeDocument.width/2);
+//     // Check Even/Odd
+//     if(numElements % 2 == 0)
+//         startPosY += (elementSize[1]/2) + elementSize[1]*((numElements/2)-1)
+//     else
+//         startPosY += elementSize[1] * Math.floor(numElements/2);
 
-//     return centerHor
+//     for(var i = 0; i < numElements; i++)
+//         strRs += "<roll id =\"" + i + "\" x=\"-228\" y=\"" + Number(startPosY-(elementSize[1]*i)) + "\" numElements=\"1\" elementSize=\"110,80\" stopIndex=\"1\" scissorSize=\"112,80\"/>\n"; 
+
+//     return strRs;
 // }
+// rolls += RespinRolls(strPos, numElements, elementSize);
+// var rollInfo = new File("C:/!MyRepos/RollInfoScript/RollInfo_RS.xml");
+// rollInfo.open("w");
+// rollInfo.write(rolls);
+// rollInfo.close();
+
+// alert(strPos);
+// alert(strPos.match(/y=\"(-*\d+)\"/)[1]);

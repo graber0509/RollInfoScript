@@ -8,6 +8,14 @@ var C_TYPE = "xsp"; // XmlSpritePhotoshop
 var C_CONVERTER_VERSION = 1;
 var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
 
+//////// isArray Polyfill ///////
+if (!Array.isArray) {
+    Array.isArray = function(arg) {
+      return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+  }
+////////////////////////////////
+
 //////////////////////////////////////////////////
 // CUSTOM DATA
 //////////////////////////////////////////////////
@@ -23,6 +31,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
         m_isCheckJPG: "isCheckJPG",
         m_isUseTextEffects: "isUseTextEffects",
         m_borderSize: "borderSize",
+        m_elementSize: "elementSize",
+        m_numElements: "numElements",
         m_isFolderName: "isFolderName",
         m_isRollInfo: "isRollInfo"
     };
@@ -36,6 +46,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
         this.m_isCheckJPG = false;
         this.m_isUseTextEffects = false;
         this.m_borderSize = 0;
+        this.m_elementSize = [110,80];
+        this.m_numElements = 4;
         this.m_isFolderName = false;
         this.m_error = 0;
     };
@@ -54,6 +66,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
             var isCheckJPG = _customData.m_isCheckJPG || false;
             var isUseTextEffects = _customData.m_isUseTextEffects || false;
             var borderSize = _customData.m_borderSize || 0;
+            var elementSize = _customData.m_elementSize || [110,80];
+            var numElements = _customData.m_numElements|| 4;
             var isFolderName = _customData.m_isFolderName || false;
             var isRollInfo = _customData.m_isRollInfo || false;
 
@@ -61,6 +75,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
             var save_isCheckJPG = _customData.m_isCheckJPG !== undefined;
             var save_isUseTextEffects = _customData.m_isUseTextEffects !== undefined;
             var save_borderSize = _customData.m_borderSize !== undefined;
+            var save_elementSize = _customData.m_elementSize !== undefined;
+            var save_numElements = _customData.m_numElements !== undefined;
             var save_isFolderName = _customData.m_isFolderName !== undefined;
             var save_isRollInfo = _customData.m_isRollInfo !== undefined;
 
@@ -83,6 +99,10 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isUseTextEffects, isUseTextEffects);
                 if (save_borderSize)
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_borderSize, borderSize);
+                if (save_elementSize)
+                    xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_elementSize, elementSize);
+                if (save_numElements)
+                    xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_numElements, numElements);
                 if (save_isFolderName)
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isFolderName, isFolderName);
                 if (save_isRollInfo)
@@ -113,8 +133,10 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 var tmp_isCheckJPG = "";
                 var tmp_isUseTextEffects = "";
                 var tmp_borderSize = "";
+                var tmp_elementSize = "";
+                var tmp_numElements = "";
                 var tmp_isFolderName = "";
-                tmp_borderSize
+
 
                 try {
                     tmp_isCentered = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isCentered);
@@ -129,6 +151,12 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                     tmp_borderSize = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_borderSize);
                 } catch (e) {}
                 try {
+                    tmp_elementSize = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_elementSize);
+                } catch (e) {}
+                try {
+                    tmp_numElements = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_numElements);
+                } catch (e) {}
+                try {
                     tmp_isFolderName = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isFolderName);
                 } catch (e) {}
                 try {
@@ -139,6 +167,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 tmp_isCheckJPG = tmp_isCheckJPG === undefined ? "false" : tmp_isCheckJPG;
                 tmp_isUseTextEffects = tmp_isUseTextEffects === undefined ? "false" : tmp_isUseTextEffects;
                 tmp_borderSize = tmp_borderSize === undefined ? "0" : tmp_borderSize;
+                tmp_elementSize = tmp_elementSize === undefined ? "110,80" : tmp_elementSize;
+                tmp_numElements = tmp_numElements === undefined ? "4" : tmp_numElements;
                 tmp_isFolderName = tmp_isFolderName === undefined ? "false" : tmp_isFolderName;
                 tmp_isRollInfo = tmp_isRollInfo === undefined ? "false" : tmp_isRollInfo;
 
@@ -146,10 +176,14 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 cdata.m_isCheckJPG = "true" === tmp_isCheckJPG.toString().toLowerCase();
                 cdata.m_isUseTextEffects = "true" === tmp_isUseTextEffects.toString().toLowerCase();
                 cdata.m_borderSize = parseInt(tmp_borderSize.toString());
+                cdata.m_elementSize = typeof tmp_elementSize == "string" ? [parseInt(tmp_elementSize.split(',')[0]),parseInt(tmp_elementSize.split(',')[1])] : tmp_elementSize;
+                cdata.m_numElements = parseInt(tmp_numElements.toString());
                 cdata.m_isFolderName = "true" === tmp_isFolderName.toString().toLowerCase();
                 cdata.m_isRollInfo = "true" === tmp_isRollInfo.toString().toLowerCase();
 
                 cdata.m_borderSize = isNaN(cdata.m_borderSize) ? 0 : cdata.m_borderSize;
+                cdata.m_elementSize = Array.isArray(cdata.m_elementSize) ? [110,80] : cdata.m_elementSize;
+                cdata.m_numElements = isNaN(cdata.m_numElements) ? 4 : cdata.m_numElements;
             }
 
             return cdata;
@@ -297,6 +331,30 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 };
                 return a;
             }
+        }
+        /**
+         * Make respin rolls
+         * @param {string} _strPos roll position string
+         * @param {int} _numElements Number of elements on one roll
+         * @param {Array} _elementSize X,Y size of one element
+         * @returns {string} return final respin rolls string
+         */
+        function RespinRolls(_strPos, _numElements, _elementSize) 
+        {
+            //Get Y value from reel
+            var startPosY = Number(strPos.match(/y=\"(-*\d+)\"/)[1]);
+            var strRs = "";
+
+            // Check Even/Odd
+            if(numElements % 2 == 0)
+                startPosY += (elementSize[1]/2) + elementSize[1]*((numElements/2)-1)
+            else
+                startPosY += elementSize[1] * Math.floor(numElements/2);
+
+            for(var i = 0; i < numElements; i++)
+                strRs += "<roll id =\"" + i + "\" x=\"-228\" y=\"" + Number(startPosY-(elementSize[1]*i)) + "\" numElements=\"1\" elementSize=\"110,80\" stopIndex=\"1\" scissorSize=\"112,80\"/>\n"; 
+
+            return strRs;
         }
         /**
          * Get layer position
@@ -728,7 +786,10 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                             strOthers += " scissor=\"true\"";
                         }
                     } else if (layerPart.name.search("item_fon") > -1) {
-                        G_PARAMS.rolls += "    <roll id=\"" + i + "\" " + strPos + " numElements=\"4\" elementSize=\"110\,80\" stopIndex=\"" + (i + 1) + "\" scissorSize=\"110,320\" slotfirePath=\"Rolls/slotfire\">\n";
+                        if(layerPart.name.search("item_fon_RS") > -1)
+                            RespinRolls(strPos, 4, G_PARAMS.m_addElementSize)
+                        else
+                            G_PARAMS.rolls += "    <roll id=\"" + i + "\" " + strPos + " numElements=\""+G_PARAMS.m_addNumElements+"\" elementSize=\""+G_PARAMS.m_addElementSize+"\" stopIndex=\"" + (i + 1) + "\" scissorSize=\"110,320\">\n";
                     } else if (layerPart.kind === LayerKind.TEXT) {
                         strTitle = "FontLabel";
                         if (!strFile) {
@@ -813,6 +874,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
          */
         this.StartWork = function() {
             var borderSizeSaveValue = 0;
+            var numElementsSaveValue = 4;
+            var elementSizeSaveValue = [110,80];
             var fil = File.saveDialog();
             if (!fil) return;
             G_PARAMS.pathF = fil.absoluteURI;
@@ -835,6 +898,14 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
             if (G_PARAMS.m_addBorder)
                 if (G_PARAMS.m_addBorderSize > 0)
                     borderSizeSaveValue = G_PARAMS.m_addBorderSize;
+
+            if (G_PARAMS.m_addElementSize)
+                if (Array.isArray(G_PARAMS.m_addElementSize) && G_PARAMS.m_addElementSize[0] > 0 && G_PARAMS.m_addElementSize[1] > 0)
+                    elementSizeSaveValue = G_PARAMS.m_addElementSize;
+            
+            if (G_PARAMS.m_addNumElements)
+                if (G_PARAMS.m_addNumElements > 0)
+                    numElementsSaveValue = G_PARAMS.m_addNumElements;
 
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = "<head type=\"xml\" version=\"1\"/>\n";
@@ -889,6 +960,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                     m_isCheckJPG: G_PARAMS.m_checkJPG,
                     m_isUseTextEffects: G_PARAMS.m_useTextEffects,
                     m_borderSize: borderSizeSaveValue,
+                    m_elementSize: elementSizeSaveValue,
+                    m_numElements: numElementsSaveValue,
                     m_isFolderName: G_PARAMS.m_isFolderName,
                     m_isRollInfo: G_PARAMS.m_isRollInfo
                 });
@@ -911,6 +984,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
         var hCB_textEffects = null;
         var hCB_border = null;
         var hET_borderSize = null;
+        var hET_elementSize = null;
+        var hET_numElements = null;
         var hCB_folderName = null;
         var hBut_start = null;
         var hBut_cancel = null;
@@ -939,9 +1014,20 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 hET_borderSize = hGrp_border.add("editText", undefined, G_PARAMS.m_addBorderSize);
                 hET_borderSize.size = [75, 25];
             }
-            hCB_folderName = hDlg.add("checkBox", undefined, "Specify \"FoldeName\"");
-            hCB_rollInfo = hDlg.add("checkBox", undefined, "Create \"RollInfo.xml\" file");
 
+            hCB_folderName = hDlg.add("checkBox", undefined, "Specify \"FoldeName\"");
+
+            // TODO: elementSize and numElements UI
+            var hGrp_rollInfo = hDlg.add("group", undefined);
+            {
+                hGrp_rollInfo.orientation = "row";
+                hGrp_rollInfo.alignChildren = "center";
+                hCB_rollInfo = hGrp_rollInfo.add("checkBox", undefined, "Create \"RollInfo.xml\" file (elementSize, numElements)");
+                hET_elementSize = hGrp_rollInfo.add("editText", undefined, G_PARAMS.m_addElementSize);
+                hET_elementSize.size = [75, 20];
+                hET_numElements = hGrp_rollInfo.add("editText", undefined, G_PARAMS.m_addNumElements);
+            }
+            
             var hGrp_bnts = hDlg.add("group", undefined);
             {
                 hGrp_bnts.orientation = "row";
@@ -978,6 +1064,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                     hCB_textEffects.value = cdata.m_isUseTextEffects;
                     hCB_border.value = cdata.m_borderSize > 0 ? true : false;
                     hET_borderSize.text = cdata.m_borderSize;
+                    hET_elementSize.text = cdata.m_elementSize;
+                    hET_numElements.text = cdata.m_numElements;
                     hCB_folderName.value = cdata.m_isFolderName;
                     hCB_rollInfo.value = cdata.m_isRollInfo;
                 } else {
@@ -1000,6 +1088,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 G_PARAMS.m_useTextEffects = hCB_textEffects.value;
                 G_PARAMS.m_addBorder = hCB_border.value;
                 G_PARAMS.m_addBorderSize = hET_borderSize.text;
+                G_PARAMS.m_addElementSize = hET_elementSize.text;
+                G_PARAMS.m_addNumElements = hET_numElements.text;
                 G_PARAMS.m_isFolderName = hCB_folderName.value;
                 G_PARAMS.m_isRollInfo = hCB_rollInfo.value;
 
@@ -1011,7 +1101,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 hCB_rollInfo.enabled = false;
                 hBut_start.enabled = false;
                 hET_borderSize.enabled = false;
-                hET_borderSize.enabled = false;
+                hET_elementSize.enabled = false;
+                hET_numElements.enabled = false;
                 hGrp_progress.visible = true;
                 //hBut_cancel.enabled = false;    
 
@@ -1029,6 +1120,8 @@ var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
                 hCB_folderName.enabled = true;
                 hBut_start.enabled = true;
                 hET_borderSize.enabled = true;
+                hET_elementSize.enabled = true;
+                hET_numElements.enabled = true;
                 hGrp_progress.visible = false;
 
                 return true;
