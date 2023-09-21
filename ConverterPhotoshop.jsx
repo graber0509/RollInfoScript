@@ -6,7 +6,7 @@
 //$.level=2;//enable debugging
 var C_TYPE = "xsp"; // XmlSpritePhotoshop
 var C_CONVERTER_VERSION = 1;
-var C_SCRIPasdT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
+var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
 
 //////////////////////////////////////////////////
 // CUSTOM DATA
@@ -1073,7 +1073,7 @@ var C_SCRIPasdT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
         /**
          * Show general dialog box
          */
-        this.Show = fussnction() {
+        this.Show = function() {
             hDlg.show();
         };
     };
