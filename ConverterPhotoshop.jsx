@@ -5,8 +5,8 @@
 
 //$.level=2;//enable debugging
 var C_TYPE = "xsp"; // XmlSpritePhotoshop
-var C_CONVERTER_VERSION = 1;
-var C_SCRIPT_VERSION = "2." + C_CONVERTER_VERSION + ".6 en";
+var C_CONVERTER_VERSION = 0;
+var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
 //////// isArray Polyfill ///////
 if (!Array.isArray) {
@@ -160,8 +160,8 @@ if (!Array.isArray) {
                 try {
                     tmp_isRollInfo = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isRollInfo);
                 } catch (e) {}
-
-                tmp_isCentered = tmp_isCentered             === undefined ? "false" : tmp_isCentered;
+                //DEFAULT VALUES
+                tmp_isCentered = tmp_isCentered             === undefined ? "true" : tmp_isCentered;
                 tmp_isCheckJPG = tmp_isCheckJPG             === undefined ? "false" : tmp_isCheckJPG;
                 tmp_isUseTextEffects = tmp_isUseTextEffects === undefined ? "false" : tmp_isUseTextEffects;
                 tmp_borderSize = tmp_borderSize             === undefined ? "0" : tmp_borderSize;
@@ -989,78 +989,125 @@ if (!Array.isArray) {
 
         var hDlg = null;
         var hBut_help = null;
-        var hCB_center = null;
+        //var hCB_center = null;
         var hCB_rollInfo = null;
-        var hCB_jpg = null;
-        var hCB_textEffects = null;
-        var hCB_border = null;
-        var hET_borderSize = null;
+        //var hCB_jpg = null;
+        //var hCB_textEffects = null;
+        //var hCB_border = null;
+        //var hET_borderSize = null;
         var hET_elementSize = null;
         var hET_numElements = null;
-        var hCB_folderName = null;
+        //var hCB_folderName = null;
         var hBut_start = null;
         var hBut_cancel = null;
         //var hSt_layerName = null;
         //var hPB_progress = null;
 
         ///// init parameters /////
-        {
-            hDlg = new Window("dialog", "Converter " + G_PARAMS.m_version);
-            hDlg.alignChildren = "left";
-            hDlg.size = [640, 320];
+        /*
+Code for Import https://scriptui.joonas.me — (Triple click to select): 
+{"activeId":19,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":"hDlg","windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Dialog","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_center","text":"Center (Center of coordinates is a center of the Photoshop document)","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-2":{"id":2,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_jpg","text":"Save layers without alpha as JPG","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-3":{"id":3,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_textEffects","text":"Consider effects when calculate coordinates of font","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-4":{"id":4,"type":"Group","parentId":15,"style":{"enabled":true,"varName":"hGrp_border","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"hCB_border","text":"Add empty pixels on borders of PNG files","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-6":{"id":6,"type":"EditText","parentId":4,"style":{"enabled":true,"varName":"hET_borderSize","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"0","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-7":{"id":7,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_folderName","text":"Specify \"FolderName\"","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-8":{"id":8,"type":"Group","parentId":15,"style":{"enabled":true,"varName":"hGrp_rollInfo","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-9":{"id":9,"type":"Checkbox","parentId":8,"style":{"enabled":true,"varName":"hCB_rollInfo","text":"Create \"RollInfo.xml\" file (elementSize, numElements)","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-10":{"id":10,"type":"EditText","parentId":8,"style":{"enabled":true,"varName":"hET_elementSize","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"110,330","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"EditText","parentId":8,"style":{"enabled":true,"varName":"hET_numElements","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"5","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_bnts","preferredSize":[148,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-13":{"id":13,"type":"Button","parentId":12,"style":{"enabled":true,"varName":"hBut_start","text":"Start","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-14":{"id":14,"type":"Button","parentId":12,"style":{"enabled":true,"varName":"hBut_cancel","text":"Cancel","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-15":{"id":15,"type":"Group","parentId":0,"style":{"enabled":true,"varName":null,"preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-16":{"id":16,"type":"Progressbar","parentId":17,"style":{"enabled":true,"varName":"hPB_progress","preferredSize":[420,25],"alignment":null,"helpTip":null}},"item-17":{"id":17,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_progress","preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-18":{"id":18,"type":"StaticText","parentId":17,"style":{"enabled":true,"varName":"hSt_layerName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"empty","justify":"left","preferredSize":[0,20],"alignment":null,"helpTip":null}},"item-19":{"id":19,"type":"Button","parentId":0,"style":{"enabled":true,"varName":"hBut_help","text":"Help","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}}},"order":[0,19,15,1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,16],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
+*/ 
 
-            hBut_help = hDlg.add("button", undefined, "Help");
-            //var myButtonGroup = hDlg.add ("group");
-            //myButtonGroup.orientation = "column";
-            //myButtonGroup.alignment = "left";
-            hCB_center = hDlg.add("checkBox", undefined, "Center (Center of coordinates is a center of the Photoshop document)");
-            hCB_jpg = hDlg.add("checkBox", undefined, "Save layers without alpha as JPG");
-            hCB_textEffects = hDlg.add("checkBox", undefined, "Consider effects when calculate coordinates of font");
+        // HDLG
+        // ====
+        var hDlg = new Window("dialog"); 
+        hDlg.text = "Dialog"; 
+        hDlg.orientation = "column"; 
+        hDlg.alignChildren = ["center","top"]; 
+        hDlg.spacing = 10; 
+        hDlg.margins = 16; 
 
-            var hGrp_border = hDlg.add("group", undefined);
-            {
-                hGrp_border.orientation = "row";
-                hGrp_border.alignChildren = "center";
-                hCB_border = hGrp_border.add("checkBox", undefined, "Add empty pixels on borders of PNG files");
-                hET_borderSize = hGrp_border.add("editText", undefined, G_PARAMS.m_addBorderSize);
-                hET_borderSize.size = [75, 25];
-            }
+        var hBut_help = hDlg.add("button", undefined, undefined, {name: "hBut_help"}); 
+        hBut_help.text = "Help"; 
 
-            hCB_folderName = hDlg.add("checkBox", undefined, "Specify \"FoldeName\"");
+        // GROUP1
+        // ======
+        var group1 = hDlg.add("group", undefined, {name: "group1"}); 
+        group1.orientation = "column"; 
+        group1.alignChildren = ["left","center"]; 
+        group1.spacing = 10; 
+        group1.margins = 0; 
 
-            // TODO: elementSize and numElements UI
-            var hGrp_rollInfo = hDlg.add("group", undefined);
-            {
-                hGrp_rollInfo.orientation = "row";
-                hGrp_rollInfo.alignChildren = "center";
-                hCB_rollInfo = hGrp_rollInfo.add("checkBox", undefined, "Create \"RollInfo.xml\" file (elementSize, numElements)");
-                hET_elementSize = hGrp_rollInfo.add("editText", undefined, G_PARAMS.m_addElementSize);
-                hET_elementSize.size = [75, 20];
-                hET_numElements = hGrp_rollInfo.add("editText", undefined, G_PARAMS.m_addNumElements);
-            }
-            
-            var hGrp_bnts = hDlg.add("group", undefined);
-            {
-                hGrp_bnts.orientation = "row";
-                hBut_start = hGrp_bnts.add("button", undefined, "Start");
-                hBut_cancel = hGrp_bnts.add("button", undefined, "Cancel");
-            }
+        // var hCB_center = group1.add("checkbox", undefined, undefined, {name: "hCB_center"}); 
+        // hCB_center.text = "Center (Center of coordinates is a center of the Photoshop document)"; 
+        // hCB_center.value = true; 
 
-            var hGrp_progress = hDlg.add("group", undefined);
-            {
-                hGrp_progress.visible = false;
-                hGrp_progress.alignment = "center";
-                hGrp_progress.size = [480, 80];
-                hGrp_progress.orientation = "column";
-                hGrp_progress.alignChildren = "center";
+        // var hCB_jpg = group1.add("checkbox", undefined, undefined, {name: "hCB_jpg"}); 
+        // hCB_jpg.text = "Save layers without alpha as JPG"; 
 
-                G_PARAMS.hSt_layerName = hGrp_progress.add("statictext", undefined, "<empty>");
-                G_PARAMS.hPB_progress = hGrp_progress.add("progressbar", undefined, 0, 100);
+        // var hCB_textEffects = group1.add("checkbox", undefined, undefined, {name: "hCB_textEffects"}); 
+        // hCB_textEffects.text = "Consider effects when calculate coordinates of font"; 
 
-                G_PARAMS.hSt_layerName.size = [470, 10];
-                G_PARAMS.hPB_progress.size = [470, 10];
-            }
-        }
+        // HGRP_BORDER
+        // ===========
+        var hGrp_border = group1.add("group", undefined, {name: "hGrp_border"}); 
+        hGrp_border.orientation = "row"; 
+        hGrp_border.alignChildren = ["left","center"]; 
+        hGrp_border.spacing = 10; 
+        hGrp_border.margins = 0; 
+
+        // var hCB_border = hGrp_border.add("checkbox", undefined, undefined, {name: "hCB_border"}); 
+        // hCB_border.text = "Add empty pixels on borders of PNG files"; 
+
+        // var hET_borderSize = hGrp_border.add('edittext {properties: {name: "hET_borderSize"}}'); 
+        // hET_borderSize.text = G_PARAMS.m_addBorderSize; 
+
+        // GROUP1
+        // ======
+        // var hCB_folderName = group1.add("checkbox", undefined, undefined, {name: "hCB_folderName"}); 
+        // hCB_folderName.text = "Specify \u0022FolderName\u0022"; 
+
+        // HGRP_ROLLINFO
+        // =============
+        var hGrp_rollInfo = group1.add("group", undefined, {name: "hGrp_rollInfo"}); 
+        hGrp_rollInfo.orientation = "row"; 
+        hGrp_rollInfo.alignChildren = ["left","center"]; 
+        hGrp_rollInfo.spacing = 10; 
+        hGrp_rollInfo.margins = 0; 
+
+        var hCB_rollInfo = hGrp_rollInfo.add("checkbox", undefined, undefined, {name: "hCB_rollInfo"}); 
+        hCB_rollInfo.text = "Create \u0022RollInfo.xml\u0022 file (elementSize, numElements)"; 
+
+        var hET_elementSize = hGrp_rollInfo.add('edittext {properties: {name: "hET_elementSize"}}'); 
+        hET_elementSize.text = G_PARAMS.m_addElementSize; 
+
+        var hET_numElements = hGrp_rollInfo.add('edittext {properties: {name: "hET_numElements"}}'); 
+        hET_numElements.text = G_PARAMS.m_numElements; 
+
+        // HGRP_BNTS
+        // =========
+        var hGrp_bnts = hDlg.add("group", undefined, {name: "hGrp_bnts"}); 
+        hGrp_bnts.preferredSize.width = 148; 
+        hGrp_bnts.orientation = "row"; 
+        hGrp_bnts.alignChildren = ["center","center"]; 
+        hGrp_bnts.spacing = 10; 
+        hGrp_bnts.margins = 0; 
+
+        var hBut_start = hGrp_bnts.add("button", undefined, undefined, {name: "hBut_start"}); 
+        hBut_start.text = "Start"; 
+
+        var hBut_cancel = hGrp_bnts.add("button", undefined, undefined, {name: "hBut_cancel"}); 
+        hBut_cancel.text = "Cancel"; 
+
+        // HGRP_PROGRESS
+        // =============
+        var hGrp_progress = hDlg.add("group", undefined, {name: "hGrp_progress"}); 
+        hGrp_progress.orientation = "column"; 
+        hGrp_progress.alignChildren = ["center","center"]; 
+        hGrp_progress.spacing = 10; 
+        hGrp_progress.margins = 0; 
+
+        G_PARAMS.hSt_layerName = hGrp_progress.add("statictext", undefined, undefined, {name: "hSt_layerName"}); 
+        G_PARAMS.hSt_layerName.text = "<empty>"; 
+        G_PARAMS.hSt_layerName.preferredSize.height = 20; 
+
+        G_PARAMS.hPB_progress = hGrp_progress.add("progressbar", undefined, undefined, {name: "hPB_progress"}); 
+        G_PARAMS.hPB_progress.maxvalue = 100; 
+        G_PARAMS.hPB_progress.value = 0; 
+        G_PARAMS.hPB_progress.preferredSize.width = 420; 
+        G_PARAMS.hPB_progress.preferredSize.height = 10; 
+
         ///// callback func /////
         {
             hDlg.onShow = function() {
@@ -1070,23 +1117,23 @@ if (!Array.isArray) {
                 var cdata = psdcd.GetData();
 
                 if (cdata.m_error === 0) {
-                    hCB_center.value = cdata.m_isCentered;
-                    hCB_jpg.value = cdata.m_isCheckJPG;
-                    hCB_textEffects.value = cdata.m_isUseTextEffects;
-                    hCB_border.value = cdata.m_borderSize > 0 ? true : false;
-                    hET_borderSize.text = cdata.m_borderSize;
+                    //hCB_center.value = cdata.m_isCentered;
+                    //hCB_jpg.value = cdata.m_isCheckJPG;
+                    //hCB_textEffects.value = cdata.m_isUseTextEffects;
+                    //hCB_border.value = cdata.m_borderSize > 0 ? true : false;
+                    //hET_borderSize.text = cdata.m_borderSize;
                     hET_elementSize.text = cdata.m_elementSize;
                     hET_numElements.text = cdata.m_numElements;
-                    hCB_folderName.value = cdata.m_isFolderName;
+                    //hCB_folderName.value = cdata.m_isFolderName;
                     hCB_rollInfo.value = cdata.m_isRollInfo;
                 } else {
-                    hCB_center.value = false;
-                    hCB_jpg.value = true;
-                    hCB_textEffects.value = false;
-                    hCB_border.value = false;
+                    //hCB_center.value = false;
+                    //hCB_jpg.value = true;
+                    //hCB_textEffects.value = false;
+                    //hCB_border.value = false;
                     hCB_rollInfo.value = true;
                 }
-                hET_borderSize.characters = 10;
+                //hET_borderSize.characters = 10;
                 //hPB_progress.size = [hDlg.width - 10 - 10, 10] ;
                 //hPB_progress.locale = [hDlg.height - 40, 10];
                 //hPB_progress.alignment = "center";
@@ -1094,24 +1141,24 @@ if (!Array.isArray) {
             };
 
             hBut_start.onClick = function() {
-                G_PARAMS.m_centered = hCB_center.value;
-                G_PARAMS.m_checkJPG = hCB_jpg.value;
-                G_PARAMS.m_useTextEffects = hCB_textEffects.value;
-                G_PARAMS.m_addBorder = hCB_border.value;
-                G_PARAMS.m_addBorderSize = hET_borderSize.text;
+                G_PARAMS.m_centered = true;//hCB_center.value
+                G_PARAMS.m_checkJPG = false;//hCB_jpg.value;
+                G_PARAMS.m_useTextEffects = false;//hCB_textEffects.value;
+                G_PARAMS.m_addBorder = false;//hCB_border.value;
+                G_PARAMS.m_addBorderSize = 0;//hET_borderSize.text;
                 G_PARAMS.m_addElementSize = hET_elementSize.text;
                 G_PARAMS.m_addNumElements = hET_numElements.text;
-                G_PARAMS.m_isFolderName = hCB_folderName.value;
+                G_PARAMS.m_isFolderName = false;//hCB_folderName.value;
                 G_PARAMS.m_isRollInfo = hCB_rollInfo.value;
 
-                hCB_center.enabled = false;
-                hCB_jpg.enabled = false;
-                hCB_border.enabled = false;
-                hCB_textEffects.enabled = false;
-                hCB_folderName.enabled = false;
+                //hCB_center.enabled = false;
+                //hCB_jpg.enabled = false;
+                //hCB_border.enabled = false;
+                //hCB_textEffects.enabled = false;
+                //hCB_folderName.enabled = false;
                 hCB_rollInfo.enabled = false;
                 hBut_start.enabled = false;
-                hET_borderSize.enabled = false;
+                //hET_borderSize.enabled = false;
                 hET_elementSize.enabled = false;
                 hET_numElements.enabled = false;
                 hGrp_progress.visible = true;
@@ -1135,13 +1182,13 @@ if (!Array.isArray) {
                     hDlg.close();
                 }
 
-                hCB_center.enabled = true;
-                hCB_jpg.enabled = true;
-                hCB_border.enabled = true;
-                hCB_folderName.enabled = true;
-                hCB_textEffects.enabled = true;
+                //hCB_center.enabled = true;
+                //hCB_jpg.enabled = true;
+                //hCB_border.enabled = true;
+                //hCB_folderName.enabled = true;
+                //hCB_textEffects.enabled = true;
                 hBut_start.enabled = true;
-                hET_borderSize.enabled = true;
+                //hET_borderSize.enabled = true;
                 hET_elementSize.enabled = true;
                 hET_numElements.enabled = true;
                 hCB_rollInfo.enabled = true;
