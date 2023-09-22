@@ -80,7 +80,6 @@ if (!Array.isArray) {
             var save_isFolderName = _customData.m_isFolderName !== undefined;
             var save_isRollInfo = _customData.m_isRollInfo !== undefined;
 
-
             if (!documents.length) {
                 result = false;
             } else {
@@ -137,7 +136,6 @@ if (!Array.isArray) {
                 var tmp_numElements = "";
                 var tmp_isFolderName = "";
 
-
                 try {
                     tmp_isCentered = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isCentered);
                 } catch (e) {}
@@ -163,27 +161,27 @@ if (!Array.isArray) {
                     tmp_isRollInfo = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isRollInfo);
                 } catch (e) {}
 
-                tmp_isCentered = tmp_isCentered === undefined ? "false" : tmp_isCentered;
-                tmp_isCheckJPG = tmp_isCheckJPG === undefined ? "false" : tmp_isCheckJPG;
+                tmp_isCentered = tmp_isCentered             === undefined ? "false" : tmp_isCentered;
+                tmp_isCheckJPG = tmp_isCheckJPG             === undefined ? "false" : tmp_isCheckJPG;
                 tmp_isUseTextEffects = tmp_isUseTextEffects === undefined ? "false" : tmp_isUseTextEffects;
-                tmp_borderSize = tmp_borderSize === undefined ? "0" : tmp_borderSize;
-                tmp_elementSize = tmp_elementSize === undefined ? "110,80" : tmp_elementSize;
-                tmp_numElements = tmp_numElements === undefined ? "4" : tmp_numElements;
-                tmp_isFolderName = tmp_isFolderName === undefined ? "false" : tmp_isFolderName;
-                tmp_isRollInfo = tmp_isRollInfo === undefined ? "false" : tmp_isRollInfo;
+                tmp_borderSize = tmp_borderSize             === undefined ? "0" : tmp_borderSize;
+                tmp_elementSize = tmp_elementSize           === undefined ? "110,80" : tmp_elementSize;
+                tmp_numElements = tmp_numElements           === undefined ? "4" : tmp_numElements;
+                tmp_isFolderName = tmp_isFolderName         === undefined ? "false" : tmp_isFolderName;
+                tmp_isRollInfo = tmp_isRollInfo             === undefined ? "false" : tmp_isRollInfo;
 
-                cdata.m_isCentered = "true" === tmp_isCentered.toString().toLowerCase();
-                cdata.m_isCheckJPG = "true" === tmp_isCheckJPG.toString().toLowerCase();
-                cdata.m_isUseTextEffects = "true" === tmp_isUseTextEffects.toString().toLowerCase();
-                cdata.m_borderSize = parseInt(tmp_borderSize.toString());
-                cdata.m_elementSize = typeof tmp_elementSize == "string" ? [parseInt(tmp_elementSize.split(',')[0]),parseInt(tmp_elementSize.split(',')[1])] : tmp_elementSize;
-                cdata.m_numElements = parseInt(tmp_numElements.toString());
-                cdata.m_isFolderName = "true" === tmp_isFolderName.toString().toLowerCase();
-                cdata.m_isRollInfo = "true" === tmp_isRollInfo.toString().toLowerCase();
+                cdata.m_isCentered                          = "true" === tmp_isCentered.toString().toLowerCase();
+                cdata.m_isCheckJPG                          = "true" === tmp_isCheckJPG.toString().toLowerCase();
+                cdata.m_isUseTextEffects                    = "true" === tmp_isUseTextEffects.toString().toLowerCase();
+                cdata.m_borderSize                          = parseInt(tmp_borderSize.toString());
+                cdata.m_elementSize                         = typeof tmp_elementSize == "string" ? [parseInt(tmp_elementSize.split(',')[0]),parseInt(tmp_elementSize.split(',')[1])] : tmp_elementSize;
+                cdata.m_numElements                         = parseInt(tmp_numElements.toString());
+                cdata.m_isFolderName                        = "true" === tmp_isFolderName.toString().toLowerCase();
+                cdata.m_isRollInfo                          = "true" === tmp_isRollInfo.toString().toLowerCase();
 
-                cdata.m_borderSize = isNaN(cdata.m_borderSize) ? 0 : cdata.m_borderSize;
-                cdata.m_elementSize = Array.isArray(cdata.m_elementSize) ? [110,80] : cdata.m_elementSize;
-                cdata.m_numElements = isNaN(cdata.m_numElements) ? 4 : cdata.m_numElements;
+                cdata.m_borderSize                          = isNaN(cdata.m_borderSize) ? 0 : cdata.m_borderSize;
+                cdata.m_elementSize                         = Array.isArray(cdata.m_elementSize) ? [110,80] : cdata.m_elementSize;
+                cdata.m_numElements                         = isNaN(cdata.m_numElements) ? 4 : cdata.m_numElements;
             }
 
             return cdata;
@@ -900,8 +898,11 @@ if (!Array.isArray) {
                     borderSizeSaveValue = G_PARAMS.m_addBorderSize;
 
             if (G_PARAMS.m_addElementSize)
-                if (Array.isArray(G_PARAMS.m_addElementSize) && G_PARAMS.m_addElementSize[0] > 0 && G_PARAMS.m_addElementSize[1] > 0)
+            {
+                var tmpArr = G_PARAMS.m_addElementSize.split(',');
+                if (Number(tmpArr[0]) > 0 && Number(tmpArr[1]) > 0)
                     elementSizeSaveValue = G_PARAMS.m_addElementSize;
+            }
             
             if (G_PARAMS.m_addNumElements)
                 if (G_PARAMS.m_addNumElements > 0)
@@ -1106,8 +1107,19 @@ if (!Array.isArray) {
                 hGrp_progress.visible = true;
                 //hBut_cancel.enabled = false;    
 
+                var tmpArr = G_PARAMS.m_addElementSize.split(",");
+
                 if (isNaN(G_PARAMS.m_addBorderSize) && G_PARAMS.m_addBorder) {
-                    alert("In the field with size not a number!");
+                    alert(G_PARAMS.m_addBorderSize + " <== In the field with size not a number!");
+                } else if(isNaN(G_PARAMS.m_addNumElements) && G_PARAMS.m_isRollInfo) {
+                    alert(G_PARAMS.m_addNumElements + " <== In the field with numElements not a number!");
+                } else if(G_PARAMS.m_isRollInfo) {
+                    if(tmpArr.length > 2)
+                        alert(G_PARAMS.m_addElementSize + " <== Too much numbers in elementSize value (must be two x,y)");
+                    else if(tmpArr.length < 2)
+                        alert(G_PARAMS.m_addElementSize + " <== Not enough numbers in elementSize value (must be two x,y)");
+                    else if(isNaN(Number(tmpArr[0])) || isNaN(Number(tmpArr[1])))
+                        alert(G_PARAMS.m_addElementSize + " <== Not a number value in elementSize");
                 } else {
                     m_converter.StartWork();
                     alert("END");
@@ -1118,10 +1130,12 @@ if (!Array.isArray) {
                 hCB_jpg.enabled = true;
                 hCB_border.enabled = true;
                 hCB_folderName.enabled = true;
+                hCB_textEffects.enabled = true;
                 hBut_start.enabled = true;
                 hET_borderSize.enabled = true;
                 hET_elementSize.enabled = true;
                 hET_numElements.enabled = true;
+                hCB_rollInfo.enabled = true;
                 hGrp_progress.visible = false;
 
                 return true;
