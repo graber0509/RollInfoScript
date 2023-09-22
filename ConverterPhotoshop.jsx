@@ -1012,7 +1012,7 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
         // HDLG
         // ====
         var hDlg = new Window("dialog"); 
-        hDlg.text = "Dialog"; 
+        hDlg.text = "Skin converter " + C_SCRIPT_VERSION; ; 
         hDlg.orientation = "column"; 
         hDlg.alignChildren = ["center","top"]; 
         hDlg.spacing = 10; 
