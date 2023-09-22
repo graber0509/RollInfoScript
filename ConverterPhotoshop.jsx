@@ -790,7 +790,7 @@ if (!Array.isArray) {
                         if (layerPart.name.toLowerCase().indexOf("scsr_") === 0) {
                             strOthers += " scissor=\"true\"";
                         }
-                    } else if (layerPart.name.search("reel") > -1) {
+                    } else if (layerPart.name.search("roll") > -1) {
                         if(layerPart.parent.name.search("fonRS") > -1) 
                             G_PARAMS.rolls += RespinRolls(strPos, G_PARAMS.m_addNumElements, G_PARAMS.m_addElementSize, i)
                         else 
