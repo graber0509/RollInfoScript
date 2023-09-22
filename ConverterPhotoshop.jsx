@@ -337,21 +337,28 @@ if (!Array.isArray) {
          * @param {Array} _elementSize X,Y size of one element
          * @returns {string} return final respin rolls string
          */
-        function RespinRolls(_strPos, _numElements, _elementSize) 
+        function RespinRolls(_strPos, _numElements, _elementSize, _startIndex) 
         {
-            //Get Y value from reel
-            var startPosY = Number(strPos.match(/y=\"(-*\d+)\"/)[1]);
+            //Get position values from reel
+            var startPosY = Number(_strPos.match(/y=\"(-*\d+)\"/)[1]);
+            var startPosX = Number(_strPos.match(/x=\"(-*\d+)\"/)[1]);
             var strRs = "";
+            var elementSizeArr = _elementSize;
+            var counter = 0;
+
+            if(typeof _elementSize == "string")
+                elementSizeArr = _elementSize.split(",");
 
             // Check Even/Odd
-            if(numElements % 2 == 0)
-                startPosY += (elementSize[1]/2) + elementSize[1]*((numElements/2)-1)
+            if(_numElements % 2 == 0)
+                startPosY += (elementSizeArr[1]/2) + elementSizeArr[1]*((_numElements/2)-1)
             else
-                startPosY += elementSize[1] * Math.floor(numElements/2);
+                startPosY += elementSizeArr[1] * Math.floor(_numElements/2);
 
-            for(var i = 0; i < numElements; i++)
-                strRs += "<roll id =\"" + i + "\" x=\"-228\" y=\"" + Number(startPosY-(elementSize[1]*i)) + "\" numElements=\"1\" elementSize=\"110,80\" stopIndex=\"1\" scissorSize=\"112,80\"/>\n"; 
+            for(var i = _startIndex*_numElements; i < (_startIndex*_numElements)+Number(_numElements); i++)
+                strRs += "    <roll id =\"" + i + "\" x=\""+startPosX+"\" y=\"" + (2*Math.round(Number(startPosY-(elementSizeArr[1]*counter++))/2)) + "\" numElements=\"1\" elementSize=\""+_elementSize+"\" stopIndex=\""+(i+1)+"\" scissorSize=\""+ elementSizeArr[0]*2 + "," + elementSizeArr[1]*2 + "\"/>\n"; 
 
+            strRs += "\n";
             return strRs;
         }
         /**
@@ -783,11 +790,14 @@ if (!Array.isArray) {
                         if (layerPart.name.toLowerCase().indexOf("scsr_") === 0) {
                             strOthers += " scissor=\"true\"";
                         }
-                    } else if (layerPart.name.search("item_fon") > -1) {
-                        if(layerPart.name.search("item_fon_RS") > -1)
-                            RespinRolls(strPos, 4, G_PARAMS.m_addElementSize)
-                        else
-                            G_PARAMS.rolls += "    <roll id=\"" + i + "\" " + strPos + " numElements=\""+G_PARAMS.m_addNumElements+"\" elementSize=\""+G_PARAMS.m_addElementSize+"\" stopIndex=\"" + (i + 1) + "\" scissorSize=\"110,320\">\n";
+                    } else if (layerPart.name.search("reel") > -1) {
+                        if(layerPart.parent.name.search("fonRS") > -1) 
+                            G_PARAMS.rolls += RespinRolls(strPos, G_PARAMS.m_addNumElements, G_PARAMS.m_addElementSize, i)
+                        else 
+                        {
+                            var tmpArr = G_PARAMS.m_addElementSize.split(",");
+                            G_PARAMS.rolls += "    <roll id=\"" + i + "\" " + strPos + " numElements=\""+G_PARAMS.m_addNumElements+"\" elementSize=\""+G_PARAMS.m_addElementSize+"\" stopIndex=\"" + (i + 1) + "\" scissorSize=\""+ tmpArr[0]*2 + "," + tmpArr[1]*2 + "\">\n";
+                        }
                     } else if (layerPart.kind === LayerKind.TEXT) {
                         strTitle = "FontLabel";
                         if (!strFile) {
@@ -857,7 +867,7 @@ if (!Array.isArray) {
                     G_PARAMS.positions += tab + "</Group>\n";
 
                     if (/^fon/gi.test(name))
-                        G_PARAMS.rolls += "</rolls" + name.slice(3) + ">\n";
+                        G_PARAMS.rolls += "</rolls" + name.slice(3) + ">\n\n";
 
 
                 }
@@ -1113,13 +1123,12 @@ if (!Array.isArray) {
                     alert(G_PARAMS.m_addBorderSize + " <== In the field with size not a number!");
                 } else if(isNaN(G_PARAMS.m_addNumElements) && G_PARAMS.m_isRollInfo) {
                     alert(G_PARAMS.m_addNumElements + " <== In the field with numElements not a number!");
-                } else if(G_PARAMS.m_isRollInfo) {
-                    if(tmpArr.length > 2)
-                        alert(G_PARAMS.m_addElementSize + " <== Too much numbers in elementSize value (must be two x,y)");
-                    else if(tmpArr.length < 2)
-                        alert(G_PARAMS.m_addElementSize + " <== Not enough numbers in elementSize value (must be two x,y)");
-                    else if(isNaN(Number(tmpArr[0])) || isNaN(Number(tmpArr[1])))
-                        alert(G_PARAMS.m_addElementSize + " <== Not a number value in elementSize");
+                } else if(G_PARAMS.m_isRollInfo && tmpArr.length > 2) {
+                    alert(G_PARAMS.m_addElementSize + " <== Too much numbers in elementSize value (must be two x,y)");
+                } else if(G_PARAMS.m_isRollInfo && tmpArr.length < 2) {
+                    alert(G_PARAMS.m_addElementSize + " <== Not enough numbers in elementSize value (must be two x,y)");
+                } else if(G_PARAMS.m_isRollInfo && isNaN(Number(tmpArr[0])) || isNaN(Number(tmpArr[1]))) {
+                    alert(G_PARAMS.m_addElementSize + " <== Not a number value in elementSize");
                 } else {
                     m_converter.StartWork();
                     alert("END");
