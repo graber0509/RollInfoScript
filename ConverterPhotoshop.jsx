@@ -793,7 +793,11 @@ if (!Array.isArray) {
                             strOthers += " scissor=\"true\"";
                         }
                     } else if (layerPart.name.search("roll") > -1) {
+<<<<<<< HEAD
                         if(layerPart.parent.name.search("fonRS") > -1) 
+=======
+                        if(layerPart.parent.name.search("rollsRS") > -1) 
+>>>>>>> master
                             G_PARAMS.rolls += RespinRolls(strPos, G_PARAMS.m_addNumElements, G_PARAMS.m_addElementSize, i)
                         else 
                         {
@@ -868,7 +872,7 @@ if (!Array.isArray) {
 
                     G_PARAMS.positions += tab + "</Group>\n";
 
-                    if (/^fon/gi.test(name))
+                    if (/^rolls/gi.test(name))
                         G_PARAMS.rolls += "</rolls" + name.slice(3) + ">\n\n";
 
 
