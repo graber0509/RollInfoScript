@@ -1,36 +1,253 @@
+var curDoc = app.activeDocument;
+var rollInfoData = GetRollInfoDataFromLayers(curDoc);
 
-//   <roll id="0" x="-228" y="-115" numElements="4" elementSize="110,80" stopIndex="1" scissorSize="110,320"  slotfirePath="Rolls/slotfire"/>
-var strPos = "x=\"-228\" y=\"-115\"";
-var rolls = "";
-var numElements = [110,80];
-//var elementSize = [110,80];
+var rollInfo = new File("C:/!MyRepos/RollInfoScript/RollInfo_TEST.xml");
+rollInfo.open("w");
+rollInfo.write(GetRollInfoStringFromData(rollInfoData));
+rollInfo.close();
+/*
+TODO: 
+- Check scissorSize and stopIndex requirements
+- Check is nessesary slotfire in RollInfo.xml
+- make _FS, _RS etc. instead of _fs, _rs
+- Develop func? to make respin rolls
+- Make button to save only RollInfo.xml
+- Do not export ROLL_INFO group (ConverterPhotoshop)
+- Delete elementSize and numElements fields in UI
+- Check is ROLL_INFO Group exists
+- Develop GetRollInfoDataFromRollsBackground?
+*/
+//alert(curDoc.layerSets[0].layerSets[0].artLayers[0].kind)
+//////////////FUNCTIONS////////////////
+/**
+* Parse layers to get roll info data from ROLL_INFO layerSet. 
+* @param {Photoshop_document} _curDoc Document to parse
+* @returns {Object_rollInfo} if success - return Object, else - undefined;
+* for example GetRollInfoData(_curDoc).ROLLS_FS[0][0].x show x-coord of 0-0 symbol position in ROLLS_FS rolls;
+*/
+function GetRollInfoDataFromLayers(_curDoc) 
+{
+    var rollInfo = {};
+    var rollNum = 0;
+    var symbolNum = 0;
+    var rolls = [];
+    var rollCoords = [];
 
-alert(typeof numElements == "string")
+    function SymbolCoords(_x, _y, _bounds, _isCenterCoords) 
+    {
+        this.x = _isCenterCoords ? _x - 0.5 * _curDoc.width  : _x;
+        this.y = _isCenterCoords ? 0.5 * _curDoc.height - _y : _curDoc.height - _y;
+        this.width = _bounds[0];
+        this.height = _bounds[1];
+    }
+    
+    for(var i = 0; i < _curDoc.layerSets.length; i++) 
+    {
+        if(_curDoc.layerSets[i].name === "ROLL_INFO") 
+        {
 
+            var rollInfoGroup = _curDoc.layerSets[i];
+            var counter = 1;
+            var rollsName = "ROLLS";
 
-  
-// function RespinRolls(strPos, numElements, elementSize) 
-// {
-//     //Get Y value from reel
-//     var startPosY = Number(strPos.match(/y=\"(-*\d+)\"/)[1]);
-//     var strRs = "";
+            for(var t = 0; t < counter;) 
+            {
+                if(rollInfoGroup.layerSets[t].name.search("ROLLS") > -1) 
+                {
+                    rollsName = rollInfoGroup.layerSets[t].name;
+                    counter = rollInfoGroup.layerSets.length;
+                    rollInfoGroup = _curDoc.layerSets[i].layerSets[t];
+          
+                } 
+    
+                for(var j = 0; rollNum < rollInfoGroup.layerSets.length;)
+                {
+                    if(j >= rollInfoGroup.layerSets.length) {break}
+                    if(rollInfoGroup.layerSets[j].name == "ROLL_" + rollNum) 
+                    {
+                        var currentRollGroup = rollInfoGroup.layerSets[j];
+                        for(var k = symbolNum; symbolNum < currentRollGroup.artLayers.length;) 
+                        {
+                            if(k >= currentRollGroup.artLayers.length) {break}
+                            if(currentRollGroup.artLayers[k].name == symbolNum) 
+                            {
 
-//     // Check Even/Odd
-//     if(numElements % 2 == 0)
-//         startPosY += (elementSize[1]/2) + elementSize[1]*((numElements/2)-1)
-//     else
-//         startPosY += elementSize[1] * Math.floor(numElements/2);
+                                var pos    = GetPosition(currentRollGroup.artLayers[k]);
+                                var bounds = GetSize(currentRollGroup.artLayers[k]);                               
+                                rollCoords.push(new SymbolCoords(pos.x, pos.y, [bounds.width, bounds.height], true));
 
-//     for(var i = 0; i < numElements; i++)
-//         strRs += "<roll id =\"" + i + "\" x=\"-228\" y=\"" + Number(startPosY-(elementSize[1]*i)) + "\" numElements=\"1\" elementSize=\"110,80\" stopIndex=\"1\" scissorSize=\"112,80\"/>\n"; 
+                                symbolNum++;
+                                k = 0;
 
-//     return strRs;
-// }
-// rolls += RespinRolls(strPos, numElements, elementSize);
-// var rollInfo = new File("C:/!MyRepos/RollInfoScript/RollInfo_RS.xml");
-// rollInfo.open("w");
-// rollInfo.write(rolls);
-// rollInfo.close();
+                            } else {
+                                k++;
+                            }                        
+                        }
+                        rolls.push(rollCoords);
+                        rollCoords = [];
+                        rollNum++; 
+                        j = 0;
+                        symbolNum = 0;
+                    } else {
+                        j++;
+                    };
+                    
+                }; 
+                t++;
+                rollInfo[rollsName] = rolls;
+                rollInfoGroup = _curDoc.layerSets[i];  
+                
+            };
+            i = _curDoc.layerSets.length;       
+        } else {
+            return undefined;
+        };                           
+    }; 
+    return rollInfo;
+};
 
-// alert(strPos);
-// alert(strPos.match(/y=\"(-*\d+)\"/)[1]);
+/**
+* This function creates RollInfo.xml file from roll info data object. 
+* @param {Object_rollInfo} _rollInfoData Roll info data object
+* @return {string} Roll Info string;
+*/
+function GetRollInfoStringFromData(_rollInfoData) 
+{
+    var tab = "	";
+    var rollInfoString = "<head type=\"xml\" version=\"1\"/>\n";
+    
+    for(var prop in _rollInfoData) 
+    {
+        var rollName = prop.toLowerCase();
+        var strX;
+        var strY;
+        var numElements;
+        var roll;
+    
+        rollInfoString += "<" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
+
+            for(var i = 0; i < _rollInfoData[prop].length; i++) 
+            {
+                roll = _rollInfoData[prop][i];
+                numElements = _rollInfoData[prop][i].length
+
+                if(numElements % 2 == 0) 
+                {
+                    strX = parseInt(roll[(numElements/2)-1].x);
+                    strY = parseInt(2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2);
+                }
+                else
+                {
+                    strX = parseInt(roll[(numElements-1)/2].x);
+                    strY = parseInt(2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2);
+                }
+
+                rollInfoString += tab + "<roll id=\"" + i +"\"" +//START ONE ROLL INFO
+                " x=\"" + strX + "\"" +
+                " y=\"" + strY + "\"" +
+                " numElements=\"" + numElements + "\"" +
+                " elementSize=\"" + roll[0].width + ","   + roll[0].height + "\"" +
+                " scissorSize=\"" + roll[0].width*2 + "," + roll[0].height*2 + "\"" +
+                " stopIndex=\"" + (i+1) + "\"" + 
+                ">\n" //END OF ONE ROLL INFO
+            }
+               
+        rollInfoString += "</" + rollName + ">\n";
+
+    }
+
+    return rollInfoString;
+}
+
+/**
+* Parse layers to get roll info data from rolls backgrounds. 
+* @param {Photoshop_document} _curDoc Document to parse
+* @returns {Object_rollInfo} if success - return Object, else - undefined;
+* for example GetRollInfoData(_curDoc).ROLLS_FS[0][0].x show x-coord of 0-0 symbol position in ROLLS_FS rolls;
+*/
+function GetRollInfoDataFromRollsBackground(_curDoc) 
+{
+ //UNDER DEVELOPMENT
+}
+
+function GetPosition(_layer, _coord_align) {
+    var x1 = parseFloat(_layer.bounds[0]);
+    var x2 = parseFloat(_layer.bounds[2]);
+    var y1 = parseFloat(_layer.bounds[1]);
+    var y2 = parseFloat(_layer.bounds[3]);
+
+    if (x1 < 0)
+        x1 = 0;
+    if (y1 < 0)
+        y1 = 0;
+    if (x2 > app.activeDocument.width)
+        x2 = app.activeDocument.width;
+    if (y2 > app.activeDocument.height)
+        y2 = app.activeDocument.height;
+
+    if (false) {
+        x1 = 0;
+        x2 = 0;
+        y1 = 0;
+        y2 = 0;
+    }
+
+    switch (_coord_align) {
+        case 0: {
+            return {
+                x: Math.round(x1),
+                y: Math.round((y1 + y2) / 2),
+            };
+        }
+        break;
+        case 1: {
+            return {
+                x: Math.round((x1 + x2) / 2),
+                y: Math.round((y1 + y2) / 2)
+            };
+        }
+        break;
+        case 2: {
+            return {
+                x: Math.round(x2),
+                y: Math.round((y1 + y2) / 2)
+            };
+        }
+        break;
+        default: {
+            return {
+                x: Math.round((x1 + x2) / 2),
+                y: Math.round((y1 + y2) / 2)
+            };
+        }
+    }
+}
+function GetSize(_layer) {
+    if (false) {
+        var a = {
+            width: 0,
+            height: 0
+        };
+        return a;
+    } else {
+        var x1 = parseFloat(_layer.bounds[0]);
+        var x2 = parseFloat(_layer.bounds[2]);
+        var y1 = parseFloat(_layer.bounds[1]);
+        var y2 = parseFloat(_layer.bounds[3]);
+
+        if (x1 < 0)
+            x1 = 0;
+        if (y1 < 0)
+            y1 = 0;
+        if (x2 > curDoc.width)
+            x2 = curDoc.width;
+        if (y2 > curDoc.height)
+            y2 = curDoc.height;
+
+        var a = {
+            width: Math.round(x2 - x1),
+            height: Math.round(y2 - y1)
+        };
+        return a;
+    }
+}

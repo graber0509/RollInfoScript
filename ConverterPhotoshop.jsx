@@ -135,6 +135,7 @@ if (!Array.isArray) {
                 var tmp_elementSize = "";
                 var tmp_numElements = "";
                 var tmp_isFolderName = "";
+                var tmp_isRollInfo = "";
 
                 try {
                     tmp_isCentered = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isCentered);
@@ -331,10 +332,11 @@ if (!Array.isArray) {
             }
         }
         /**
-         * Make respin rolls
+         * Make respin rolls from fon element
          * @param {string} _strPos roll position string
          * @param {int} _numElements Number of elements on one roll
          * @param {Array} _elementSize X,Y size of one element
+         * @param {int} _startIndex Respin first element number in row
          * @returns {string} return final respin rolls string
          */
         function RespinRolls(_strPos, _numElements, _elementSize, _startIndex) 
@@ -673,7 +675,7 @@ if (!Array.isArray) {
             app.activeDocument = _curDoc;
         }
         /**
-         * chek string for valid simvols
+         * check string for valid symb
          * @param {string} _str string for checking
          */
         function CheckStrValidEx(_str) {
@@ -989,19 +991,19 @@ if (!Array.isArray) {
 
         var hDlg = null;
         var hBut_help = null;
-        //var hCB_center = null;
         var hCB_rollInfo = null;
-        //var hCB_jpg = null;
-        //var hCB_textEffects = null;
-        //var hCB_border = null;
-        //var hET_borderSize = null;
         var hET_elementSize = null;
         var hET_numElements = null;
-        //var hCB_folderName = null;
         var hBut_start = null;
         var hBut_cancel = null;
         //var hSt_layerName = null;
         //var hPB_progress = null;
+        //var hCB_jpg = null;
+        //var hCB_textEffects = null;
+        //var hCB_border = null;
+        //var hET_borderSize = null;
+        //var hCB_folderName = null;
+        //var hCB_center = null;
 
         ///// init parameters /////
         /*
@@ -1122,9 +1124,9 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     //hCB_textEffects.value = cdata.m_isUseTextEffects;
                     //hCB_border.value = cdata.m_borderSize > 0 ? true : false;
                     //hET_borderSize.text = cdata.m_borderSize;
+                    //hCB_folderName.value = cdata.m_isFolderName;
                     hET_elementSize.text = cdata.m_elementSize;
                     hET_numElements.text = cdata.m_numElements;
-                    //hCB_folderName.value = cdata.m_isFolderName;
                     hCB_rollInfo.value = cdata.m_isRollInfo;
                 } else {
                     //hCB_center.value = false;
@@ -1151,18 +1153,19 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 G_PARAMS.m_isFolderName = false;//hCB_folderName.value;
                 G_PARAMS.m_isRollInfo = hCB_rollInfo.value;
 
+
+                hCB_rollInfo.enabled = false;
+                hBut_start.enabled = false;             
+                hET_elementSize.enabled = false;
+                hET_numElements.enabled = false;
+                hGrp_progress.visible = true;
+                //hBut_cancel.enabled = false;    
+                //hET_borderSize.enabled = false;
                 //hCB_center.enabled = false;
                 //hCB_jpg.enabled = false;
                 //hCB_border.enabled = false;
                 //hCB_textEffects.enabled = false;
                 //hCB_folderName.enabled = false;
-                hCB_rollInfo.enabled = false;
-                hBut_start.enabled = false;
-                //hET_borderSize.enabled = false;
-                hET_elementSize.enabled = false;
-                hET_numElements.enabled = false;
-                hGrp_progress.visible = true;
-                //hBut_cancel.enabled = false;    
 
                 var tmpArr = G_PARAMS.m_addElementSize.split(",");
 
@@ -1187,8 +1190,8 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 //hCB_border.enabled = true;
                 //hCB_folderName.enabled = true;
                 //hCB_textEffects.enabled = true;
-                hBut_start.enabled = true;
                 //hET_borderSize.enabled = true;
+                hBut_start.enabled = true;
                 hET_elementSize.enabled = true;
                 hET_numElements.enabled = true;
                 hCB_rollInfo.enabled = true;
