@@ -9,13 +9,14 @@ rollInfo.close();
 TODO: 
 - Check scissorSize and stopIndex requirements
 - Check is nessesary slotfire in RollInfo.xml
-- make _FS, _RS etc. instead of _fs, _rs
++ make _FS, _RS etc. instead of _fs, _rs
 - Develop func? to make respin rolls
 - Make button to save only RollInfo.xml
 - Do not export ROLL_INFO group (ConverterPhotoshop)
 - Delete elementSize and numElements fields in UI
 - Check is ROLL_INFO Group exists
 - Develop GetRollInfoDataFromRollsBackground?
+- Verifying naming of groups and layers
 */
 //alert(curDoc.layerSets[0].layerSets[0].artLayers[0].kind)
 //////////////FUNCTIONS////////////////
@@ -35,8 +36,8 @@ function GetRollInfoDataFromLayers(_curDoc)
 
     function SymbolCoords(_x, _y, _bounds, _isCenterCoords) 
     {
-        this.x = _isCenterCoords ? _x - 0.5 * _curDoc.width  : _x;
-        this.y = _isCenterCoords ? 0.5 * _curDoc.height - _y : _curDoc.height - _y;
+        this.x = _isCenterCoords ? _x - (0.5 * parseInt(_curDoc.width))  : _x;
+        this.y = _isCenterCoords ? (0.5 * parseInt(_curDoc.height)) - _y : parseInt(_curDoc.height) - _y;
         this.width = _bounds[0];
         this.height = _bounds[1];
     }
@@ -118,13 +119,14 @@ function GetRollInfoStringFromData(_rollInfoData)
     
     for(var prop in _rollInfoData) 
     {
-        var rollName = prop.toLowerCase();
+
+        var rollName = prop.replace("ROLLS", "").toUpperCase();
         var strX;
         var strY;
         var numElements;
         var roll;
     
-        rollInfoString += "<" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
+        rollInfoString += "<rolls" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
 
             for(var i = 0; i < _rollInfoData[prop].length; i++) 
             {
@@ -133,26 +135,28 @@ function GetRollInfoStringFromData(_rollInfoData)
 
                 if(numElements % 2 == 0) 
                 {
-                    strX = parseInt(roll[(numElements/2)-1].x);
-                    strY = parseInt(2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2);
+                    strX = roll[(numElements/2)-1].x;
+                    strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
                 }
                 else
                 {
-                    strX = parseInt(roll[(numElements-1)/2].x);
-                    strY = parseInt(2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2);
+                    strX = roll[(numElements-1)/2].x;
+                    strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
                 }
 
-                rollInfoString += tab + "<roll id=\"" + i +"\"" +//START ONE ROLL INFO
+                //START OF BUILDING ROLL INFO TEXT LINE
+                rollInfoString += tab + "<roll id=\"" + i +"\"" +
                 " x=\"" + strX + "\"" +
                 " y=\"" + strY + "\"" +
                 " numElements=\"" + numElements + "\"" +
                 " elementSize=\"" + roll[0].width + ","   + roll[0].height + "\"" +
                 " scissorSize=\"" + roll[0].width*2 + "," + roll[0].height*2 + "\"" +
                 " stopIndex=\"" + (i+1) + "\"" + 
-                ">\n" //END OF ONE ROLL INFO
+                ">\n" 
+                //END OF ROLL INFO TEXT LINE
             }
                
-        rollInfoString += "</" + rollName + ">\n";
+        rollInfoString += "</rolls" + rollName + ">\n";
 
     }
 
@@ -169,7 +173,6 @@ function GetRollInfoDataFromRollsBackground(_curDoc)
 {
  //UNDER DEVELOPMENT
 }
-
 function GetPosition(_layer, _coord_align) {
     var x1 = parseFloat(_layer.bounds[0]);
     var x2 = parseFloat(_layer.bounds[2]);
