@@ -892,11 +892,15 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
         * @param {Object_rollInfo} _rollInfoData Roll info data object
         * @return {string} Roll Info string;
         */
-        this.GetRollInfoString= function(_curDoc) 
+        this.GetRollInfoString = function(_curDoc) 
         {
             var tab = "	";
             var rollInfoString = "<head type=\"xml\" version=\"1\"/>\n";
             var _rollInfoData = this.GetRollInfoDataFromLayers(_curDoc);
+            
+            if(_rollInfoData == undefined) 
+                return undefined
+
             for(var prop in _rollInfoData) 
             {
                 var rollName = prop.replace("ROLLS", "").toUpperCase();
@@ -972,6 +976,9 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
+                if(G_PARAMS.rolls == undefined) 
+                    alert("Warning! \"ROLL_INFO\" layer group not found!\n" +  
+                    "Check name of group or existence")
             }
             //TODO: need calculate and add size
             G_PARAMS.positions = "<head type=\"" + C_TYPE + "\" version=\"" + C_CONVERTER_VERSION + "\" />\n";
@@ -1266,11 +1273,19 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 hGrp_progress.visible = true;
 
                 var rollInfoString = m_rollInfo.GetRollInfoString(G_PARAMS.curDoc);
+
+                if(rollInfoString == undefined) 
+                {
+                    alert("Error! \"ROLL_INFO\" layer group not found!\n" +  
+                    "Check name of group or existence", "RollInfo Error!", true)
+                    Error.runtimeError(101, "Exit Script");
+                }
+
                 var rollInfo = new File(pathF + "/RollInfo.xml");
                 rollInfo.open("w");
                 rollInfo.write(rollInfoString);
                 rollInfo.close();
-                alert("RollInfo created!");
+                alert("RollInfo created succesfully!");
                 hDlg.close();
 
             };
