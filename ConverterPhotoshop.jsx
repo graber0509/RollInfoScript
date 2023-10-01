@@ -8,14 +8,6 @@ var C_TYPE = "xsp"; // XmlSpritePhotoshop
 var C_CONVERTER_VERSION = 0;
 var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
-//////// isArray Polyfill ///////
-if (!Array.isArray) {
-    Array.isArray = function(arg) {
-      return Object.prototype.toString.call(arg) === '[object Array]';
-    };
-  }
-////////////////////////////////
-
 //////////////////////////////////////////////////
 // CUSTOM DATA
 //////////////////////////////////////////////////
