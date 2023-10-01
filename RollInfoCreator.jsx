@@ -14,7 +14,7 @@ TODO:
 + Make button to save only RollInfo.xml
 + Do not export ROLL_INFO group (ConverterPhotoshop)
 + Delete elementSize and numElements fields in UI
-- Check is ROLL_INFO Group exists
++ Check is ROLL_INFO Group exists
 - Develop GetRollInfoDataFromRollsBackground?
 - Verifying naming of groups and layers
 */
