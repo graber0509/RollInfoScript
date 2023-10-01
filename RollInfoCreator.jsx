@@ -11,9 +11,9 @@ TODO:
 - Check is nessesary slotfire in RollInfo.xml
 + make _FS, _RS etc. instead of _fs, _rs
 - Develop func? to make respin rolls
-- Make button to save only RollInfo.xml
-- Do not export ROLL_INFO group (ConverterPhotoshop)
-- Delete elementSize and numElements fields in UI
++ Make button to save only RollInfo.xml
++ Do not export ROLL_INFO group (ConverterPhotoshop)
++ Delete elementSize and numElements fields in UI
 - Check is ROLL_INFO Group exists
 - Develop GetRollInfoDataFromRollsBackground?
 - Verifying naming of groups and layers
@@ -106,7 +106,6 @@ function GetRollInfoDataFromLayers(_curDoc)
     }; 
     return rollInfo;
 };
-
 /**
 * This function creates RollInfo.xml file from roll info data object. 
 * @param {Object_rollInfo} _rollInfoData Roll info data object
@@ -162,7 +161,6 @@ function GetRollInfoStringFromData(_rollInfoData)
 
     return rollInfoString;
 }
-
 /**
 * Parse layers to get roll info data from rolls backgrounds. 
 * @param {Photoshop_document} _curDoc Document to parse
@@ -253,4 +251,37 @@ function GetSize(_layer) {
         };
         return a;
     }
+}
+
+/**
+ * Make respin rolls from fon element
+ * @param {string} _strPos roll position string
+ * @param {int} _numElements Number of elements on one roll
+ * @param {Array} _elementSize X,Y size of one element
+ * @param {int} _startIndex Respin first element number in row
+ * @returns {string} return final respin rolls string
+ */
+function RespinRolls(_strPos, _numElements, _elementSize, _startIndex) 
+        {
+            //Get position values from reel
+            var startPosY = Number(_strPos.match(/y=\"(-*\d+)\"/)[1]);
+            var startPosX = Number(_strPos.match(/x=\"(-*\d+)\"/)[1]);
+            var strRs = "";
+            var elementSizeArr = _elementSize;
+            var counter = 0;
+
+            if(typeof _elementSize == "string")
+                elementSizeArr = _elementSize.split(",");
+
+            // Check Even/Odd
+            if(_numElements % 2 == 0)
+                startPosY += (elementSizeArr[1]/2) + elementSizeArr[1]*((_numElements/2)-1)
+            else
+                startPosY += elementSizeArr[1] * Math.floor(_numElements/2);
+
+            for(var i = _startIndex*_numElements; i < (_startIndex*_numElements)+Number(_numElements); i++)
+                strRs += "    <roll id =\"" + i + "\" x=\""+startPosX+"\" y=\"" + (2*Math.round(Number(startPosY-(elementSizeArr[1]*counter++))/2)) + "\" numElements=\"1\" elementSize=\""+_elementSize+"\" stopIndex=\""+(i+1)+"\" scissorSize=\""+ elementSizeArr[0]*2 + "," + elementSizeArr[1]*2 + "\"/>\n"; 
+
+            strRs += "\n";
+            return strRs;
 }

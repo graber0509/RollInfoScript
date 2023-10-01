@@ -31,8 +31,6 @@ if (!Array.isArray) {
         m_isCheckJPG: "isCheckJPG",
         m_isUseTextEffects: "isUseTextEffects",
         m_borderSize: "borderSize",
-        m_elementSize: "elementSize",
-        m_numElements: "numElements",
         m_isFolderName: "isFolderName",
         m_isRollInfo: "isRollInfo"
     };
@@ -306,7 +304,7 @@ if (!Array.isArray) {
             if (IsEmptyLayer(_layer) === true) {
                 var a = {
                     width: 0,
-                    hight: 0
+                    height: 0
                 };
                 return a;
             } else {
@@ -326,42 +324,10 @@ if (!Array.isArray) {
 
                 var a = {
                     width: Math.round(x2 - x1),
-                    hight: Math.round(y2 - y1)
+                    height: Math.round(y2 - y1)
                 };
                 return a;
             }
-        }
-        /**
-         * Make respin rolls from fon element
-         * @param {string} _strPos roll position string
-         * @param {int} _numElements Number of elements on one roll
-         * @param {Array} _elementSize X,Y size of one element
-         * @param {int} _startIndex Respin first element number in row
-         * @returns {string} return final respin rolls string
-         */
-        function RespinRolls(_strPos, _numElements, _elementSize, _startIndex) 
-        {
-            //Get position values from reel
-            var startPosY = Number(_strPos.match(/y=\"(-*\d+)\"/)[1]);
-            var startPosX = Number(_strPos.match(/x=\"(-*\d+)\"/)[1]);
-            var strRs = "";
-            var elementSizeArr = _elementSize;
-            var counter = 0;
-
-            if(typeof _elementSize == "string")
-                elementSizeArr = _elementSize.split(",");
-
-            // Check Even/Odd
-            if(_numElements % 2 == 0)
-                startPosY += (elementSizeArr[1]/2) + elementSizeArr[1]*((_numElements/2)-1)
-            else
-                startPosY += elementSizeArr[1] * Math.floor(_numElements/2);
-
-            for(var i = _startIndex*_numElements; i < (_startIndex*_numElements)+Number(_numElements); i++)
-                strRs += "    <roll id =\"" + i + "\" x=\""+startPosX+"\" y=\"" + (2*Math.round(Number(startPosY-(elementSizeArr[1]*counter++))/2)) + "\" numElements=\"1\" elementSize=\""+_elementSize+"\" stopIndex=\""+(i+1)+"\" scissorSize=\""+ elementSizeArr[0]*2 + "," + elementSizeArr[1]*2 + "\"/>\n"; 
-
-            strRs += "\n";
-            return strRs;
         }
         /**
          * Get layer position
@@ -682,7 +648,6 @@ if (!Array.isArray) {
             var checkRegExp = /^[a-zA-Z0-9\=\+\-\*\(\)\/\^\&\$\?\:\;\,\.\_\[\]\%\#\ 局\`\'\"\!\~\(\)\<\>\s]+$/;
             return checkRegExp.test(_str);
         }
-
         function ConvertToXMLText(_str) {
             var text = "";
             for (var i1 = 0; i1 < _str.length; i1++) {
@@ -719,7 +684,7 @@ if (!Array.isArray) {
 
                 G_PARAMS.hSt_layerName.text = layerPart.name;
 
-                if (!layerPart.visible) continue;
+                if (!layerPart.visible || layerPart.name == "ROLL_INFO") continue;
 
                 ///// -----  EXIT SCRIPT PART ----- /////
                 if ((layerPart.typename !== "LayerSet") && !CheckStrValidEx(layerPart.name)) {
@@ -792,14 +757,6 @@ if (!Array.isArray) {
                         if (layerPart.name.toLowerCase().indexOf("scsr_") === 0) {
                             strOthers += " scissor=\"true\"";
                         }
-                    } else if (layerPart.name.search("roll") > -1) {
-                        if(layerPart.parent.name.search("rollsRS") > -1) 
-                            G_PARAMS.rolls += RespinRolls(strPos, G_PARAMS.m_addNumElements, G_PARAMS.m_addElementSize, i)
-                        else 
-                        {
-                            var tmpArr = G_PARAMS.m_addElementSize.split(",");
-                            G_PARAMS.rolls += "    <roll id=\"" + i + "\" " + strPos + " numElements=\""+G_PARAMS.m_addNumElements+"\" elementSize=\""+G_PARAMS.m_addElementSize+"\" stopIndex=\"" + (i + 1) + "\" scissorSize=\""+ tmpArr[0]*2 + "," + tmpArr[1]*2 + "\">\n";
-                        }
                     } else if (layerPart.kind === LayerKind.TEXT) {
                         strTitle = "FontLabel";
                         if (!strFile) {
@@ -857,9 +814,6 @@ if (!Array.isArray) {
                     G_PARAMS.positions += "\" size=\"" + size.width + "," + size.hight + "\ ";
                     G_PARAMS.positions += "\" opacity=\"" + Math.round(layerPart.opacity) + "\" >\n";
 
-                    if (/^fon/gi.test(name))
-                        G_PARAMS.rolls += "<rolls" + name.slice(3) + " scale=\"1,1\" pos=\"0,0\">\n";
-
                     if (layerPart.visible) {
                         G_PARAMS.m_stopProgressBar = G_PARAMS.m_stopProgressBar + 1;
                         HandleLayer(layerPart.layers);
@@ -867,9 +821,6 @@ if (!Array.isArray) {
                     }
 
                     G_PARAMS.positions += tab + "</Group>\n";
-
-                    if (/^rolls/gi.test(name))
-                        G_PARAMS.rolls += "</rolls" + name.slice(3) + ">\n\n";
 
 
                 }
@@ -880,12 +831,153 @@ if (!Array.isArray) {
             tab = tab.substr(0, tab.length - 4);
         };
         /**
+        * Parse layers to get roll info data from ROLL_INFO layerSet. 
+        * @param {Photoshop_document} _curDoc Document to parse
+        * @returns {Object_rollInfo} if success - return Object, else - undefined;
+        * for example GetRollInfoData(_curDoc).ROLLS_FS[0][0].x show x-coord of 0-0 symbol position in ROLLS_FS rolls;
+        */
+        this.GetRollInfoDataFromLayers = function(_curDoc) 
+        {
+            var rollInfo = {};
+            var rollCoords = [];
+
+            function SymbolCoords(_x, _y, _bounds, _isCenterCoords) 
+            {
+                this.x = _isCenterCoords ? _x - (0.5 * parseInt(_curDoc.width))  : _x;
+                this.y = _isCenterCoords ? (0.5 * parseInt(_curDoc.height)) - _y : parseInt(_curDoc.height) - _y;
+                this.width = _bounds[0];
+                this.height = _bounds[1];
+            }
+
+            for(var i = 0; i < _curDoc.layerSets.length; i++) 
+            {
+                if(_curDoc.layerSets[i].name === "ROLL_INFO") 
+                {
+
+                    var rollInfoGroup = _curDoc.layerSets[i];
+                    var counter = 1;
+                    var rollsName = "ROLLS";
+                    
+                    for(var t = 0; t < counter;) 
+                    {
+                        var rolls = [];
+                        var rollNum = 0;
+                        var symbolNum = 0;
+                        if(rollInfoGroup.layerSets[t].name.search("ROLLS") > -1) 
+                        {
+                            rollsName = rollInfoGroup.layerSets[t].name;
+                            counter = rollInfoGroup.layerSets.length;
+                            rollInfoGroup = _curDoc.layerSets[i].layerSets[t];   
+                        } 
+                        
+                        for(var j = 0; rolls.length < rollInfoGroup.layerSets.length;)
+                        {
+                            if(rollInfoGroup.layerSets[j].name == "ROLL_" + rollNum) 
+                            {
+                                var currentRollGroup = rollInfoGroup.layerSets[j];
+                                for(var k = symbolNum; symbolNum < currentRollGroup.artLayers.length;) 
+                                {
+                                    if(k >= currentRollGroup.artLayers.length) {break}
+                                    if(currentRollGroup.artLayers[k].name == symbolNum) 
+                                    {
+
+                                        G_PARAMS.hSt_layerName.text = rollsName + " - " + rollInfoGroup.layerSets[j].name + " - " + symbolNum;
+                                        var pos    = GetPosition(currentRollGroup.artLayers[k]);                                         
+                                        var bounds = GetSize(currentRollGroup.artLayers[k]);                               
+                                        rollCoords.push(new SymbolCoords(pos.x, pos.y, [bounds.width, bounds.height], true));
+
+                                        if (G_PARAMS.m_stopProgressBar === 0) {
+                                            G_PARAMS.hPB_progress.value = (symbolNum + 1) / (rollInfoGroup.layerSets.length-1) * 100;
+                                        }    
+
+                                        symbolNum++;
+                                        k = 0;
+                                    } else {
+                                        k++;
+                                    } 
+                                                    
+                                }
+                                rolls.push(rollCoords);
+                                rollCoords = [];
+                                rollNum++; 
+                                j = 0;
+                                symbolNum = 0;
+                            } else {
+                                j++;
+                            };
+          
+                        };       
+                        t++;
+                        rollInfo[rollsName] = rolls;
+                        rollInfoGroup = _curDoc.layerSets[i];  
+
+                    };
+                    i = _curDoc.layerSets.length;       
+                } else {
+                    return undefined;
+                };                           
+            }; 
+            return rollInfo;
+        };
+        /**
+        * This function creates RollInfo.xml file from roll info data object. 
+        * @param {Object_rollInfo} _rollInfoData Roll info data object
+        * @return {string} Roll Info string;
+        */
+        this.GetRollInfoString= function(_curDoc) 
+        {
+            var tab = "	";
+            var rollInfoString = "<head type=\"xml\" version=\"1\"/>\n";
+            var _rollInfoData = this.GetRollInfoDataFromLayers(_curDoc);
+            for(var prop in _rollInfoData) 
+            {
+                var rollName = prop.replace("ROLLS", "").toUpperCase();
+                var strX;
+                var strY;
+                var numElements;
+                var roll;
+            
+                rollInfoString += "<rolls" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
+
+                    for(var i = 0; i < _rollInfoData[prop].length; i++) 
+                    {
+                        roll = _rollInfoData[prop][i];
+                        numElements = _rollInfoData[prop][i].length
+
+                        if(numElements % 2 == 0) 
+                        {
+                            strX = roll[(numElements/2)-1].x;
+                            strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
+                        }
+                        else
+                        {
+                            strX = roll[(numElements-1)/2].x;
+                            strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
+                        }
+
+                        //START OF BUILDING ROLL INFO TEXT LINE
+                        rollInfoString += tab + "<roll id=\"" + i +"\"" +
+                        " x=\"" + strX + "\"" +
+                        " y=\"" + strY + "\"" +
+                        " numElements=\"" + numElements + "\"" +
+                        " elementSize=\"" + roll[0].width + ","   + roll[0].height + "\"" +
+                        " scissorSize=\"" + roll[0].width*2 + "," + roll[0].height*2 + "\"" +
+                        " stopIndex=\"" + (i+1) + "\"" + 
+                        ">\n" 
+                        //END OF ROLL INFO TEXT LINE
+                    }
+                    
+                rollInfoString += "</rolls" + rollName + ">\n";
+
+            }
+
+            return rollInfoString;
+        };     
+        /**
          * starting convertor
          */
         this.StartWork = function() {
             var borderSizeSaveValue = 0;
-            var numElementsSaveValue = 4;
-            var elementSizeSaveValue = [110,80];
             var fil = File.saveDialog();
             if (!fil) return;
             G_PARAMS.pathF = fil.absoluteURI;
@@ -921,7 +1013,7 @@ if (!Array.isArray) {
                     numElementsSaveValue = G_PARAMS.m_addNumElements;
 
             if (G_PARAMS.m_isRollInfo) {
-                G_PARAMS.rolls = "<head type=\"xml\" version=\"1\"/>\n";
+                G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
             }
             //TODO: need calculate and add size
             G_PARAMS.positions = "<head type=\"" + C_TYPE + "\" version=\"" + C_CONVERTER_VERSION + "\" />\n";
@@ -958,12 +1050,12 @@ if (!Array.isArray) {
                 data.write(G_PARAMS.positions);
                 data.close();
 
-                if (G_PARAMS.m_isRollInfo) {
-                    var rollInfo = new File(G_PARAMS.pathF.replace(/\w+$/gi, "") + "RollInfo.xml");
-                    rollInfo.open("w");
-                    rollInfo.write(G_PARAMS.rolls);
-                    rollInfo.close();
-                }
+            if (G_PARAMS.m_isRollInfo) {
+                var rollInfo = new File(G_PARAMS.pathF.replace(/\w+$/gi, "") + "RollInfo.xml");
+                rollInfo.open("w");
+                rollInfo.write(G_PARAMS.rolls);
+                rollInfo.close();
+            }
 
 
                 ///// save params in psd /////
@@ -973,8 +1065,6 @@ if (!Array.isArray) {
                     m_isCheckJPG: G_PARAMS.m_checkJPG,
                     m_isUseTextEffects: G_PARAMS.m_useTextEffects,
                     m_borderSize: borderSizeSaveValue,
-                    m_elementSize: elementSizeSaveValue,
-                    m_numElements: numElementsSaveValue,
                     m_isFolderName: G_PARAMS.m_isFolderName,
                     m_isRollInfo: G_PARAMS.m_isRollInfo
                 });
@@ -991,11 +1081,9 @@ if (!Array.isArray) {
 
         var hDlg = null;
         var hBut_help = null;
-        var hCB_rollInfo = null;
-        var hET_elementSize = null;
-        var hET_numElements = null;
         var hBut_start = null;
         var hBut_cancel = null;
+        var hBut_rollInfo = null;
         //var hSt_layerName = null;
         //var hPB_progress = null;
         //var hCB_jpg = null;
@@ -1007,108 +1095,98 @@ if (!Array.isArray) {
 
         ///// init parameters /////
         /*
+
+/*
 Code for Import https://scriptui.joonas.me — (Triple click to select): 
-{"activeId":19,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":"hDlg","windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Dialog","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-1":{"id":1,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_center","text":"Center (Center of coordinates is a center of the Photoshop document)","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-2":{"id":2,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_jpg","text":"Save layers without alpha as JPG","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-3":{"id":3,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_textEffects","text":"Consider effects when calculate coordinates of font","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-4":{"id":4,"type":"Group","parentId":15,"style":{"enabled":true,"varName":"hGrp_border","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-5":{"id":5,"type":"Checkbox","parentId":4,"style":{"enabled":true,"varName":"hCB_border","text":"Add empty pixels on borders of PNG files","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-6":{"id":6,"type":"EditText","parentId":4,"style":{"enabled":true,"varName":"hET_borderSize","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"0","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-7":{"id":7,"type":"Checkbox","parentId":15,"style":{"enabled":true,"varName":"hCB_folderName","text":"Specify \"FolderName\"","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-8":{"id":8,"type":"Group","parentId":15,"style":{"enabled":true,"varName":"hGrp_rollInfo","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-9":{"id":9,"type":"Checkbox","parentId":8,"style":{"enabled":true,"varName":"hCB_rollInfo","text":"Create \"RollInfo.xml\" file (elementSize, numElements)","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":false}},"item-10":{"id":10,"type":"EditText","parentId":8,"style":{"enabled":true,"varName":"hET_elementSize","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"110,330","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-11":{"id":11,"type":"EditText","parentId":8,"style":{"enabled":true,"varName":"hET_numElements","creationProps":{"noecho":false,"readonly":false,"multiline":false,"scrollable":false,"borderless":false,"enterKeySignalsOnChange":false},"softWrap":false,"text":"5","justify":"left","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-12":{"id":12,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_bnts","preferredSize":[148,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-13":{"id":13,"type":"Button","parentId":12,"style":{"enabled":true,"varName":"hBut_start","text":"Start","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-14":{"id":14,"type":"Button","parentId":12,"style":{"enabled":true,"varName":"hBut_cancel","text":"Cancel","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-15":{"id":15,"type":"Group","parentId":0,"style":{"enabled":true,"varName":null,"preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-16":{"id":16,"type":"Progressbar","parentId":17,"style":{"enabled":true,"varName":"hPB_progress","preferredSize":[420,25],"alignment":null,"helpTip":null}},"item-17":{"id":17,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_progress","preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-18":{"id":18,"type":"StaticText","parentId":17,"style":{"enabled":true,"varName":"hSt_layerName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"empty","justify":"left","preferredSize":[0,20],"alignment":null,"helpTip":null}},"item-19":{"id":19,"type":"Button","parentId":0,"style":{"enabled":true,"varName":"hBut_help","text":"Help","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}}},"order":[0,19,15,1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,16],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
+{"activeId":21,"items":{"item-0":{"id":0,"type":"Dialog","parentId":false,"style":{"enabled":true,"varName":"hDlg","windowType":"Dialog","creationProps":{"su1PanelCoordinates":false,"maximizeButton":false,"minimizeButton":false,"independent":false,"closeButton":true,"borderless":false,"resizeable":false},"text":"Dialog","preferredSize":[0,0],"margins":16,"orientation":"column","spacing":10,"alignChildren":["center","top"]}},"item-8":{"id":8,"type":"Group","parentId":15,"style":{"enabled":true,"varName":"hGrp_rollInfo","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-9":{"id":9,"type":"Checkbox","parentId":8,"style":{"enabled":true,"varName":"hCB_rollInfo","text":"Create \"RollInfo.xml\" file ","preferredSize":[0,0],"alignment":null,"helpTip":null,"checked":true}},"item-12":{"id":12,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_bnts","preferredSize":[148,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-13":{"id":13,"type":"Button","parentId":20,"style":{"enabled":true,"varName":"hBut_start","text":"Start","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-14":{"id":14,"type":"Button","parentId":20,"style":{"enabled":true,"varName":"hBut_cancel","text":"Cancel","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-15":{"id":15,"type":"Group","parentId":0,"style":{"enabled":true,"varName":null,"preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-16":{"id":16,"type":"Progressbar","parentId":17,"style":{"enabled":true,"varName":"hPB_progress","preferredSize":[420,25],"alignment":null,"helpTip":null}},"item-17":{"id":17,"type":"Group","parentId":0,"style":{"enabled":true,"varName":"hGrp_progress","preferredSize":[0,0],"margins":0,"orientation":"column","spacing":10,"alignChildren":["center","center"],"alignment":null}},"item-18":{"id":18,"type":"StaticText","parentId":17,"style":{"enabled":true,"varName":"hSt_layerName","creationProps":{"truncate":"none","multiline":false,"scrolling":false},"softWrap":false,"text":"empty","justify":"left","preferredSize":[0,20],"alignment":null,"helpTip":null}},"item-19":{"id":19,"type":"Button","parentId":0,"style":{"enabled":true,"varName":"hBut_help","text":"Help","justify":"center","preferredSize":[0,0],"alignment":null,"helpTip":null}},"item-20":{"id":20,"type":"Group","parentId":12,"style":{"enabled":true,"varName":"hGrp_btns1","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}},"item-21":{"id":21,"type":"Button","parentId":22,"style":{"enabled":true,"varName":"hBut_rollInfo","text":"Only RollInfo.xml","justify":"center","preferredSize":[138,0],"alignment":null,"helpTip":null}},"item-22":{"id":22,"type":"Group","parentId":12,"style":{"enabled":true,"varName":"hGrp_btns2","preferredSize":[0,0],"margins":0,"orientation":"row","spacing":10,"alignChildren":["left","center"],"alignment":null}}},"order":[0,19,15,8,9,12,20,13,14,22,21,17,18,16],"settings":{"importJSON":true,"indentSize":false,"cepExport":false,"includeCSSJS":true,"showDialog":true,"functionWrapper":false,"afterEffectsDockable":false,"itemReferenceList":"None"}}
 */ 
 
         // HDLG
         // ====
         var hDlg = new Window("dialog"); 
-        hDlg.text = "Skin converter " + C_SCRIPT_VERSION; ; 
-        hDlg.orientation = "column"; 
-        hDlg.alignChildren = ["center","top"]; 
-        hDlg.spacing = 10; 
-        hDlg.margins = 16; 
+            hDlg.text = "ConverterPhotoshop " + C_SCRIPT_VERSION; 
+            hDlg.orientation = "column"; 
+            hDlg.alignChildren = ["center","top"]; 
+            hDlg.spacing = 10; 
+            hDlg.margins = 16; 
 
         var hBut_help = hDlg.add("button", undefined, undefined, {name: "hBut_help"}); 
-        hBut_help.text = "Help"; 
+            hBut_help.text = "Help"; 
 
         // GROUP1
         // ======
         var group1 = hDlg.add("group", undefined, {name: "group1"}); 
-        group1.orientation = "column"; 
-        group1.alignChildren = ["left","center"]; 
-        group1.spacing = 10; 
-        group1.margins = 0; 
-
-        // var hCB_center = group1.add("checkbox", undefined, undefined, {name: "hCB_center"}); 
-        // hCB_center.text = "Center (Center of coordinates is a center of the Photoshop document)"; 
-        // hCB_center.value = true; 
-
-        // var hCB_jpg = group1.add("checkbox", undefined, undefined, {name: "hCB_jpg"}); 
-        // hCB_jpg.text = "Save layers without alpha as JPG"; 
-
-        // var hCB_textEffects = group1.add("checkbox", undefined, undefined, {name: "hCB_textEffects"}); 
-        // hCB_textEffects.text = "Consider effects when calculate coordinates of font"; 
-
-        // HGRP_BORDER
-        // ===========
-        var hGrp_border = group1.add("group", undefined, {name: "hGrp_border"}); 
-        hGrp_border.orientation = "row"; 
-        hGrp_border.alignChildren = ["left","center"]; 
-        hGrp_border.spacing = 10; 
-        hGrp_border.margins = 0; 
-
-        // var hCB_border = hGrp_border.add("checkbox", undefined, undefined, {name: "hCB_border"}); 
-        // hCB_border.text = "Add empty pixels on borders of PNG files"; 
-
-        // var hET_borderSize = hGrp_border.add('edittext {properties: {name: "hET_borderSize"}}'); 
-        // hET_borderSize.text = G_PARAMS.m_addBorderSize; 
-
-        // GROUP1
-        // ======
-        // var hCB_folderName = group1.add("checkbox", undefined, undefined, {name: "hCB_folderName"}); 
-        // hCB_folderName.text = "Specify \u0022FolderName\u0022"; 
+            group1.orientation = "column"; 
+            group1.alignChildren = ["left","center"]; 
+            group1.spacing = 10; 
+            group1.margins = 0; 
 
         // HGRP_ROLLINFO
         // =============
         var hGrp_rollInfo = group1.add("group", undefined, {name: "hGrp_rollInfo"}); 
-        hGrp_rollInfo.orientation = "row"; 
-        hGrp_rollInfo.alignChildren = ["left","center"]; 
-        hGrp_rollInfo.spacing = 10; 
-        hGrp_rollInfo.margins = 0; 
+            hGrp_rollInfo.orientation = "row"; 
+            hGrp_rollInfo.alignChildren = ["left","center"]; 
+            hGrp_rollInfo.spacing = 10; 
+            hGrp_rollInfo.margins = 0; 
 
         var hCB_rollInfo = hGrp_rollInfo.add("checkbox", undefined, undefined, {name: "hCB_rollInfo"}); 
-        hCB_rollInfo.text = "Create \u0022RollInfo.xml\u0022 file (elementSize, numElements)"; 
-
-        var hET_elementSize = hGrp_rollInfo.add('edittext {properties: {name: "hET_elementSize"}}'); 
-        hET_elementSize.text = G_PARAMS.m_addElementSize; 
-
-        var hET_numElements = hGrp_rollInfo.add('edittext {properties: {name: "hET_numElements"}}'); 
-        hET_numElements.text = G_PARAMS.m_numElements; 
+            hCB_rollInfo.text = "Create \u0022RollInfo.xml\u0022 file "; 
+            hCB_rollInfo.value = true; 
 
         // HGRP_BNTS
         // =========
         var hGrp_bnts = hDlg.add("group", undefined, {name: "hGrp_bnts"}); 
-        hGrp_bnts.preferredSize.width = 148; 
-        hGrp_bnts.orientation = "row"; 
-        hGrp_bnts.alignChildren = ["center","center"]; 
-        hGrp_bnts.spacing = 10; 
-        hGrp_bnts.margins = 0; 
+            hGrp_bnts.preferredSize.width = 148; 
+            hGrp_bnts.orientation = "column"; 
+            hGrp_bnts.alignChildren = ["center","center"]; 
+            hGrp_bnts.spacing = 10; 
+            hGrp_bnts.margins = 0; 
 
-        var hBut_start = hGrp_bnts.add("button", undefined, undefined, {name: "hBut_start"}); 
-        hBut_start.text = "Start"; 
+        // HGRP_BTNS1
+        // ==========
+        var hGrp_btns1 = hGrp_bnts.add("group", undefined, {name: "hGrp_btns1"}); 
+            hGrp_btns1.orientation = "row"; 
+            hGrp_btns1.alignChildren = ["left","center"]; 
+            hGrp_btns1.spacing = 10; 
+            hGrp_btns1.margins = 0; 
 
-        var hBut_cancel = hGrp_bnts.add("button", undefined, undefined, {name: "hBut_cancel"}); 
-        hBut_cancel.text = "Cancel"; 
+        var hBut_start = hGrp_btns1.add("button", undefined, undefined, {name: "hBut_start"}); 
+            hBut_start.text = "Start"; 
+
+        var hBut_cancel = hGrp_btns1.add("button", undefined, undefined, {name: "hBut_cancel"}); 
+            hBut_cancel.text = "Cancel"; 
+
+        // HGRP_BTNS2
+        // ==========
+        var hGrp_btns2 = hGrp_bnts.add("group", undefined, {name: "hGrp_btns2"}); 
+            hGrp_btns2.orientation = "row"; 
+            hGrp_btns2.alignChildren = ["left","center"]; 
+            hGrp_btns2.spacing = 10; 
+            hGrp_btns2.margins = 0; 
+
+        var hBut_rollInfo = hGrp_btns2.add("button", undefined, undefined, {name: "hBut_rollInfo"}); 
+            hBut_rollInfo.text = "Only RollInfo.xml"; 
+            hBut_rollInfo.preferredSize.width = 138; 
 
         // HGRP_PROGRESS
         // =============
         var hGrp_progress = hDlg.add("group", undefined, {name: "hGrp_progress"}); 
-        hGrp_progress.orientation = "column"; 
-        hGrp_progress.alignChildren = ["center","center"]; 
-        hGrp_progress.spacing = 10; 
-        hGrp_progress.margins = 0; 
+            hGrp_progress.orientation = "column"; 
+            hGrp_progress.alignChildren = ["center","center"]; 
+            hGrp_progress.spacing = 10; 
+            hGrp_progress.margins = 0; 
 
-        G_PARAMS.hSt_layerName = hGrp_progress.add("statictext", undefined, undefined, {name: "hSt_layerName"}); 
-        G_PARAMS.hSt_layerName.text = "<empty>"; 
-        G_PARAMS.hSt_layerName.preferredSize.height = 20; 
+            G_PARAMS.hSt_layerName = hGrp_progress.add("statictext", undefined, undefined, {name: "hSt_layerName"}); 
+            G_PARAMS.hSt_layerName.text = "<empty>"; 
+            G_PARAMS.hSt_layerName.justify = "center";
+            G_PARAMS.hSt_layerName.preferredSize.height = 20; 
+            G_PARAMS.hSt_layerName.preferredSize.width = 180; 
 
-        G_PARAMS.hPB_progress = hGrp_progress.add("progressbar", undefined, undefined, {name: "hPB_progress"}); 
-        G_PARAMS.hPB_progress.maxvalue = 100; 
-        G_PARAMS.hPB_progress.value = 0; 
-        G_PARAMS.hPB_progress.preferredSize.width = 420; 
-        G_PARAMS.hPB_progress.preferredSize.height = 10; 
+            G_PARAMS.hPB_progress = hGrp_progress.add("progressbar", undefined, undefined, {name: "hPB_progress"}); 
+            G_PARAMS.hPB_progress.maxvalue = 100; 
+            G_PARAMS.hPB_progress.value = 0; 
+            G_PARAMS.hPB_progress.preferredSize.width = 180; 
+            G_PARAMS.hPB_progress.preferredSize.height = 10; 
 
         ///// callback func /////
         {
@@ -1125,8 +1203,8 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     //hCB_border.value = cdata.m_borderSize > 0 ? true : false;
                     //hET_borderSize.text = cdata.m_borderSize;
                     //hCB_folderName.value = cdata.m_isFolderName;
-                    hET_elementSize.text = cdata.m_elementSize;
-                    hET_numElements.text = cdata.m_numElements;
+                    //hET_elementSize.text = cdata.m_elementSize;
+                    //hET_numElements.text = cdata.m_numElements;
                     hCB_rollInfo.value = cdata.m_isRollInfo;
                 } else {
                     //hCB_center.value = false;
@@ -1148,16 +1226,13 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 G_PARAMS.m_useTextEffects = false;//hCB_textEffects.value;
                 G_PARAMS.m_addBorder = false;//hCB_border.value;
                 G_PARAMS.m_addBorderSize = 0;//hET_borderSize.text;
-                G_PARAMS.m_addElementSize = hET_elementSize.text;
-                G_PARAMS.m_addNumElements = hET_numElements.text;
                 G_PARAMS.m_isFolderName = false;//hCB_folderName.value;
                 G_PARAMS.m_isRollInfo = hCB_rollInfo.value;
 
 
                 hCB_rollInfo.enabled = false;
-                hBut_start.enabled = false;             
-                hET_elementSize.enabled = false;
-                hET_numElements.enabled = false;
+                hBut_start.enabled = false; 
+                hBut_rollInfo.enabled = false;              
                 hGrp_progress.visible = true;
                 //hBut_cancel.enabled = false;    
                 //hET_borderSize.enabled = false;
@@ -1167,18 +1242,8 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 //hCB_textEffects.enabled = false;
                 //hCB_folderName.enabled = false;
 
-                var tmpArr = G_PARAMS.m_addElementSize.split(",");
-
                 if (isNaN(G_PARAMS.m_addBorderSize) && G_PARAMS.m_addBorder) {
                     alert(G_PARAMS.m_addBorderSize + " <== In the field with size not a number!");
-                } else if(isNaN(G_PARAMS.m_addNumElements) && G_PARAMS.m_isRollInfo) {
-                    alert(G_PARAMS.m_addNumElements + " <== In the field with numElements not a number!");
-                } else if(G_PARAMS.m_isRollInfo && tmpArr.length > 2) {
-                    alert(G_PARAMS.m_addElementSize + " <== Too much numbers in elementSize value (must be two x,y)");
-                } else if(G_PARAMS.m_isRollInfo && tmpArr.length < 2) {
-                    alert(G_PARAMS.m_addElementSize + " <== Not enough numbers in elementSize value (must be two x,y)");
-                } else if(G_PARAMS.m_isRollInfo && isNaN(Number(tmpArr[0])) || isNaN(Number(tmpArr[1]))) {
-                    alert(G_PARAMS.m_addElementSize + " <== Not a number value in elementSize");
                 } else {
                     m_converter.StartWork();
                     alert("END");
@@ -1192,9 +1257,8 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                 //hCB_textEffects.enabled = true;
                 //hET_borderSize.enabled = true;
                 hBut_start.enabled = true;
-                hET_elementSize.enabled = true;
-                hET_numElements.enabled = true;
                 hCB_rollInfo.enabled = true;
+                hBut_rollInfo.enabled = true; 
                 hGrp_progress.visible = false;
 
                 return true;
@@ -1234,6 +1298,26 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     "Layer with prefix \"mask_\" will be automatically saved as PNG and empty pixels will be added to borders (size of border specified in the start of script)\n"
                 );
             };
+
+            hBut_rollInfo.onClick = function() {
+
+                var pathF = Folder(G_PARAMS.curDoc.path).selectDlg();            
+                var m_rollInfo = new CConverter();
+
+                hBut_help.enabled = false;
+                hCB_rollInfo.enabled = false;
+                hBut_start.enabled = false;             
+                hGrp_progress.visible = true;
+
+                var rollInfoString = m_rollInfo.GetRollInfoString(G_PARAMS.curDoc);
+                var rollInfo = new File(pathF + "/RollInfo.xml");
+                rollInfo.open("w");
+                rollInfo.write(rollInfoString);
+                rollInfo.close();
+                alert("RollInfo created!");
+                hDlg.close();
+
+            };
         }
         ///// public func /////
         /**
@@ -1243,6 +1327,7 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
             hDlg.show();
         };
     };
+
 }
 
 //////////////////////////////////////////////////
