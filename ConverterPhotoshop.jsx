@@ -44,8 +44,6 @@ if (!Array.isArray) {
         this.m_isCheckJPG = false;
         this.m_isUseTextEffects = false;
         this.m_borderSize = 0;
-        this.m_elementSize = [110,80];
-        this.m_numElements = 4;
         this.m_isFolderName = false;
         this.m_error = 0;
     };
@@ -64,8 +62,6 @@ if (!Array.isArray) {
             var isCheckJPG = _customData.m_isCheckJPG || false;
             var isUseTextEffects = _customData.m_isUseTextEffects || false;
             var borderSize = _customData.m_borderSize || 0;
-            var elementSize = _customData.m_elementSize || [110,80];
-            var numElements = _customData.m_numElements|| 4;
             var isFolderName = _customData.m_isFolderName || false;
             var isRollInfo = _customData.m_isRollInfo || false;
 
@@ -73,8 +69,6 @@ if (!Array.isArray) {
             var save_isCheckJPG = _customData.m_isCheckJPG !== undefined;
             var save_isUseTextEffects = _customData.m_isUseTextEffects !== undefined;
             var save_borderSize = _customData.m_borderSize !== undefined;
-            var save_elementSize = _customData.m_elementSize !== undefined;
-            var save_numElements = _customData.m_numElements !== undefined;
             var save_isFolderName = _customData.m_isFolderName !== undefined;
             var save_isRollInfo = _customData.m_isRollInfo !== undefined;
 
@@ -96,10 +90,6 @@ if (!Array.isArray) {
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isUseTextEffects, isUseTextEffects);
                 if (save_borderSize)
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_borderSize, borderSize);
-                if (save_elementSize)
-                    xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_elementSize, elementSize);
-                if (save_numElements)
-                    xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_numElements, numElements);
                 if (save_isFolderName)
                     xmp.setProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isFolderName, isFolderName);
                 if (save_isRollInfo)
@@ -130,8 +120,6 @@ if (!Array.isArray) {
                 var tmp_isCheckJPG = "";
                 var tmp_isUseTextEffects = "";
                 var tmp_borderSize = "";
-                var tmp_elementSize = "";
-                var tmp_numElements = "";
                 var tmp_isFolderName = "";
                 var tmp_isRollInfo = "";
 
@@ -148,12 +136,6 @@ if (!Array.isArray) {
                     tmp_borderSize = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_borderSize);
                 } catch (e) {}
                 try {
-                    tmp_elementSize = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_elementSize);
-                } catch (e) {}
-                try {
-                    tmp_numElements = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_numElements);
-                } catch (e) {}
-                try {
                     tmp_isFolderName = xmp.getProperty(SCustomDataKeys.m_nameSpace, SCustomDataKeys.m_isFolderName);
                 } catch (e) {}
                 try {
@@ -164,8 +146,6 @@ if (!Array.isArray) {
                 tmp_isCheckJPG = tmp_isCheckJPG             === undefined ? "false" : tmp_isCheckJPG;
                 tmp_isUseTextEffects = tmp_isUseTextEffects === undefined ? "false" : tmp_isUseTextEffects;
                 tmp_borderSize = tmp_borderSize             === undefined ? "0" : tmp_borderSize;
-                tmp_elementSize = tmp_elementSize           === undefined ? "110,80" : tmp_elementSize;
-                tmp_numElements = tmp_numElements           === undefined ? "4" : tmp_numElements;
                 tmp_isFolderName = tmp_isFolderName         === undefined ? "false" : tmp_isFolderName;
                 tmp_isRollInfo = tmp_isRollInfo             === undefined ? "false" : tmp_isRollInfo;
 
@@ -173,14 +153,10 @@ if (!Array.isArray) {
                 cdata.m_isCheckJPG                          = "true" === tmp_isCheckJPG.toString().toLowerCase();
                 cdata.m_isUseTextEffects                    = "true" === tmp_isUseTextEffects.toString().toLowerCase();
                 cdata.m_borderSize                          = parseInt(tmp_borderSize.toString());
-                cdata.m_elementSize                         = typeof tmp_elementSize == "string" ? [parseInt(tmp_elementSize.split(',')[0]),parseInt(tmp_elementSize.split(',')[1])] : tmp_elementSize;
-                cdata.m_numElements                         = parseInt(tmp_numElements.toString());
                 cdata.m_isFolderName                        = "true" === tmp_isFolderName.toString().toLowerCase();
                 cdata.m_isRollInfo                          = "true" === tmp_isRollInfo.toString().toLowerCase();
 
                 cdata.m_borderSize                          = isNaN(cdata.m_borderSize) ? 0 : cdata.m_borderSize;
-                cdata.m_elementSize                         = Array.isArray(cdata.m_elementSize) ? [110,80] : cdata.m_elementSize;
-                cdata.m_numElements                         = isNaN(cdata.m_numElements) ? 4 : cdata.m_numElements;
             }
 
             return cdata;
@@ -1001,16 +977,6 @@ if (!Array.isArray) {
                 if (G_PARAMS.m_addBorderSize > 0)
                     borderSizeSaveValue = G_PARAMS.m_addBorderSize;
 
-            if (G_PARAMS.m_addElementSize)
-            {
-                var tmpArr = G_PARAMS.m_addElementSize.split(',');
-                if (Number(tmpArr[0]) > 0 && Number(tmpArr[1]) > 0)
-                    elementSizeSaveValue = G_PARAMS.m_addElementSize;
-            }
-            
-            if (G_PARAMS.m_addNumElements)
-                if (G_PARAMS.m_addNumElements > 0)
-                    numElementsSaveValue = G_PARAMS.m_addNumElements;
 
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
@@ -1202,8 +1168,6 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     //hCB_textEffects.value = cdata.m_isUseTextEffects;
                     //hCB_border.value = cdata.m_borderSize > 0 ? true : false;
                     //hET_borderSize.text = cdata.m_borderSize;
-                    //hCB_folderName.value = cdata.m_isFolderName;
-                    //hET_elementSize.text = cdata.m_elementSize;
                     //hET_numElements.text = cdata.m_numElements;
                     hCB_rollInfo.value = cdata.m_isRollInfo;
                 } else {
