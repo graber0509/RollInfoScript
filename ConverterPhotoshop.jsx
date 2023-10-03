@@ -187,7 +187,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
          */
         this.docHeight = 0;
 
-
+        
         /**
          * version of converter
          * @type String
@@ -242,6 +242,26 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
          * @type Photoshop GUI control handler
          */
         this.hSt_layerName = undefined;
+        /**
+         * Default roll info group name
+         * @type string
+         */
+        this.defaultRollInfoGroupName = "ROLL_INFO";
+        /**
+         * Default single roll group name
+         * @type string
+         */
+        this.defaultRollGroupName = "ROLL_";
+        /**
+         * Default rolls group name
+         * @type string
+         */
+        this.defaultRollsGroupName = "ROLLS";
+        /**
+         * Default respin group name
+         * @type string
+         */
+        this.defaultRespinGroupName = "_RS";    
     };
 
     var G_PARAMS = new SParams();
@@ -652,7 +672,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
                 G_PARAMS.hSt_layerName.text = layerPart.name;
 
-                if (!layerPart.visible || layerPart.parent.name == "ROLL_INFO") continue;
+                if (!layerPart.visible || layerPart.parent.name == G_PARAMS.defaultRollInfoGroupName) continue;
 
                 ///// -----  EXIT SCRIPT PART ----- /////
                 if ((layerPart.typename !== "LayerSet") && !CheckStrValidEx(layerPart.name)) {
@@ -799,7 +819,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
             tab = tab.substr(0, tab.length - 4);
         };
         /**
-        * Parse layers to get roll info data from ROLL_INFO layerSet. 
+        * Parse layers to get roll info data from @param G_PARAMS.defaultRollInfoGroupName layerSet. 
         * @param {Photoshop_document} _curDoc Document to parse
         * @returns {Object_rollInfo} if success - return Object, else - undefined;
         * for example GetRollInfoData(_curDoc).ROLLS_FS[0][0].x show x-coord of 0-0 symbol position in ROLLS_FS rolls;
@@ -819,19 +839,19 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
             for(var i = 0; i < _curDoc.layerSets.length; i++) 
             {
-                if(_curDoc.layerSets[i].name === "ROLL_INFO") 
+                if(_curDoc.layerSets[i].name == G_PARAMS.defaultRollInfoGroupName) 
                 {
 
                     var rollInfoGroup = _curDoc.layerSets[i];
                     var counter = 1;
-                    var rollsName = "ROLLS";
+                    var rollsName = G_PARAMS.defaultRollsGroupName;
                     
                     for(var t = 0; t < counter;) 
                     {
                         var rolls = [];
                         var rollNum = 0;
                         var symbolNum = 0;
-                        if(rollInfoGroup.layerSets[t].name.search("ROLLS") > -1) 
+                        if(rollInfoGroup.layerSets[t].name.search(G_PARAMS.defaultRollsGroupName) > -1) 
                         {
                             rollsName = rollInfoGroup.layerSets[t].name;
                             counter = rollInfoGroup.layerSets.length;
@@ -840,7 +860,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                         
                         for(var j = 0; rolls.length < rollInfoGroup.layerSets.length;)
                         {
-                            if(rollInfoGroup.layerSets[j].name == "ROLL_" + rollNum) 
+                            if(rollInfoGroup.layerSets[j].name == G_PARAMS.defaultRollGroupName + rollNum) 
                             {
                                 var currentRollGroup = rollInfoGroup.layerSets[j];
                                 for(var k = symbolNum; symbolNum < currentRollGroup.artLayers.length;) 
@@ -903,40 +923,58 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
             for(var prop in _rollInfoData) 
             {
-                var rollName = prop.replace("ROLLS", "").toUpperCase();
+                var rollName = prop.replace(G_PARAMS.defaultRollsGroupName, "").toUpperCase();
                 var strX;
                 var strY;
                 var numElements;
                 var roll;
-            
+                var rollCoords;
+                var counter = 0;
                 rollInfoString += "<rolls" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
 
                     for(var i = 0; i < _rollInfoData[prop].length; i++) 
                     {
+                        rollCoords = []
                         roll = _rollInfoData[prop][i];
-                        numElements = _rollInfoData[prop][i].length
+                        numElements = rollName == G_PARAMS.defaultRespinGroupName ? 1 : roll.length;
 
-                        if(numElements % 2 == 0) 
+                        if(numElements % 2 == 0 && rollName != "_RS") 
                         {
                             strX = roll[(numElements/2)-1].x;
                             strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
+                            rollCoords.push([strX, strY])
                         }
-                        else
+                        else if(rollName != "_RS" && numElements > 1)
                         {
                             strX = roll[(numElements-1)/2].x;
                             strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
+                            rollCoords.push([strX, strY])
+                        } 
+                        else 
+                        {
+                            for(var j = 0; j < roll.length; j++) 
+                            {
+                                strX = roll[j].x;
+                                strY = roll[j].y;
+                                rollCoords.push([strX, strY]);
+                            }
+                                
                         }
 
-                        //START OF BUILDING ROLL INFO TEXT LINE
-                        rollInfoString += tab + "<roll id=\"" + i +"\"" +
-                        " x=\"" + strX + "\"" +
-                        " y=\"" + strY + "\"" +
-                        " numElements=\"" + numElements + "\"" +
-                        " elementSize=\"" + roll[0].width + ","   + roll[0].height + "\"" +
-                        " scissorSize=\"" + roll[0].width*2 + "," + roll[0].height*2 + "\"" +
-                        " stopIndex=\"" + (i+1) + "\"" + 
-                        ">\n" 
-                        //END OF ROLL INFO TEXT LINE
+                        for(var j = 0; j < rollCoords.length; j++)                       
+                        {
+                            //START OF BUILDING ROLL INFO TEXT LINE
+                            rollInfoString += tab + "<roll id=\"" + counter +"\"" +
+                            " x=\"" + rollCoords[j][0] + "\"" +
+                            " y=\"" + rollCoords[j][1] + "\"" +
+                            " numElements=\"" + numElements + "\"" +
+                            " elementSize=\"" + roll[j].width + ","   + roll[j].height + "\"" +
+                            " scissorSize=\"" + roll[j].width*2 + "," + roll[j].height*2 + "\"" +
+                            " stopIndex=\"" + (counter+1) + "\"" + 
+                            ">\n" 
+                            //END OF ROLL INFO TEXT LINE
+                            counter++;
+                        }
                     }
                     
                 rollInfoString += "</rolls" + rollName + ">\n";
@@ -977,7 +1015,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
                 if(G_PARAMS.rolls == undefined) 
-                    alert("Error! \"ROLL_INFO\" layer group not found!\n" +  
+                    alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
                     "Check name of group or existence\n" +
                     "or uncheck RollInfo.xml export", "RollInfo Error!", true)
                     Error.runtimeError(101, "Exit Script");
@@ -1278,7 +1316,7 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
 
                 if(rollInfoString == undefined) 
                 {
-                    alert("Error! \"ROLL_INFO\" layer group not found!\n" +  
+                    alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
                     "Check name of group or existence", "RollInfo Error!", true)
                     Error.runtimeError(101, "Exit Script");
                 }
