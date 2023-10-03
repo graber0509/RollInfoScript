@@ -10,13 +10,14 @@ TODO:
 - Check scissorSize and stopIndex requirements
 - Check is nessesary slotfire in RollInfo.xml
 + make _FS, _RS etc. instead of _fs, _rs
-- Develop func? to make respin rolls
++ Develop func? to make respin rolls
 + Make button to save only RollInfo.xml
 + Do not export ROLL_INFO group (ConverterPhotoshop)
 + Delete elementSize and numElements fields in UI
 + Check is ROLL_INFO Group exists
 - Develop GetRollInfoDataFromRollsBackground?
 - Verifying naming of groups and layers
+- Add help info
 */
 //alert(curDoc.layerSets[0].layerSets[0].artLayers[0].kind)
 //////////////FUNCTIONS////////////////

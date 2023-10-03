@@ -16,9 +16,8 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
      * keys of parameters for write and read from psd
      */
     var SCustomDataKeys = {
-        m_nameSpace: "http://www.alcomi.com/",
+        m_nameSpace: "http://www.playtika.com/",
         m_prefix: "ananas:",
-
         m_isCentered: "isCentered",
         m_isCheckJPG: "isCheckJPG",
         m_isUseTextEffects: "isUseTextEffects",
@@ -1011,7 +1010,6 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                 if (G_PARAMS.m_addBorderSize > 0)
                     borderSizeSaveValue = G_PARAMS.m_addBorderSize;
 
-
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
                 if(G_PARAMS.rolls == undefined) 
@@ -1170,7 +1168,7 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
             hGrp_btns2.margins = 0; 
 
         var hBut_rollInfo = hGrp_btns2.add("button", undefined, undefined, {name: "hBut_rollInfo"}); 
-            hBut_rollInfo.text = "Only RollInfo.xml"; 
+            hBut_rollInfo.text = "Only Roll Info"; 
             hBut_rollInfo.preferredSize.width = 138; 
 
         // HGRP_PROGRESS
@@ -1298,35 +1296,50 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     "Bottom layer (3rd) in group of button - disabled state of button; \n" +
                     "\n" +
                     "Work with mask: \n" +
-                    "Layer with prefix \"mask_\" will be automatically saved as PNG and empty pixels will be added to borders (size of border specified in the start of script)\n"
+                    "Layer with prefix \"mask_\" will be automatically saved as PNG and empty pixels will be added to borders (size of border specified in the start of script)\n\n" +
+                    "Work with RollInfo.xml:\n" +
+                    "if you need to export RollInfo.xml, create \"ROLL_INFO\" layer group which contains \"ROLLS_<rollsName>\" groups," +
+                    "each \"ROLLS\" group must contain \"ROLL_<rollNum>\" roll\n" +
+                    "each \"ROLL\" group must contain rect (name of rect - ONLY index number: 0,1,2,3.. etc) which have proper size and coordinates" 
                 );
             };
 
             hBut_rollInfo.onClick = function() {
 
-                var pathF = Folder(G_PARAMS.curDoc.path).selectDlg();            
-                var m_rollInfo = new CConverter();
-
-                hBut_help.enabled = false;
-                hCB_rollInfo.enabled = false;
-                hBut_start.enabled = false;             
-                hGrp_progress.visible = true;
-
-                var rollInfoString = m_rollInfo.GetRollInfoString(G_PARAMS.curDoc);
-
-                if(rollInfoString == undefined) 
+                var pathF = File.saveDialog().absoluteURI;   
+                if(pathF)              
                 {
-                    alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
-                    "Check name of group or existence", "RollInfo Error!", true)
-                    Error.runtimeError(101, "Exit Script");
-                }
+                    var m_rollInfo = new CConverter();
 
-                var rollInfo = new File(pathF + "/RollInfo.xml");
-                rollInfo.open("w");
-                rollInfo.write(rollInfoString);
-                rollInfo.close();
-                alert("RollInfo created succesfully!");
-                hDlg.close();
+                    if (pathF.substr(-4, 4) === (".xml"))
+                        pathF = pathF.substr(0, pathF.length - 4);
+     
+                    hBut_help.enabled = false;
+                    hCB_rollInfo.enabled = false;
+                    hBut_start.enabled = false;             
+                    hGrp_progress.visible = true;
+    
+                    var rollInfoString = m_rollInfo.GetRollInfoString(G_PARAMS.curDoc);
+    
+                    if(rollInfoString == undefined) 
+                    {
+                        alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
+                        "Check name of group or existence", "RollInfo Error!", true)
+                        Error.runtimeError(101, "Exit Script");
+                    }
+    
+                    var rollInfo = new File(pathF + ".xml");
+                    rollInfo.open("w");
+                    rollInfo.write(rollInfoString);
+                    rollInfo.close();
+                    alert("RollInfo created succesfully!");
+                    hDlg.close();
+                }
+                else
+                {
+                    alert("You need to choose a folder!");
+                    Error.runtimeError(101, "Exit Script");
+                }     
 
             };
         }
