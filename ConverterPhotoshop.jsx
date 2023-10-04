@@ -16,7 +16,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
      * keys of parameters for write and read from psd
      */
     var SCustomDataKeys = {
-        m_nameSpace: "http://www.playtika.com/",
+        m_nameSpace: "http://www.alcomi.com/",
         m_prefix: "ananas:",
         m_isCentered: "isCentered",
         m_isCheckJPG: "isCheckJPG",
