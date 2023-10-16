@@ -265,7 +265,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
     var G_PARAMS = new SParams();
 
-    function CConverter() {
+    function  CConverter() {
         /**
          * Check is layer empty
          * @param {Photoshop_layer} _layer Photoshop layer
@@ -825,7 +825,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
         */
         this.GetRollInfoDataFromLayers = function(_curDoc) 
         {
-            var rollInfo = {};
+            var rollInfo = undefined;
             var rollCoords = [];
 
             function SymbolCoords(_x, _y, _bounds, _isCenterCoords) 
@@ -840,7 +840,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
             {
                 if(_curDoc.layerSets[i].name == G_PARAMS.defaultRollInfoGroupName) 
                 {
-
+                    rollInfo = {};
                     var rollInfoGroup = _curDoc.layerSets[i];
                     var counter = 1;
                     var rollsName = G_PARAMS.defaultRollsGroupName;
@@ -899,10 +899,9 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                         rollInfoGroup = _curDoc.layerSets[i];  
 
                     };
-                    i = _curDoc.layerSets.length;       
-                } else {
-                    return undefined;
-                };                           
+                    i = _curDoc.layerSets.length; 
+                    break;      
+                };                       
             }; 
             return rollInfo;
         };
@@ -1325,7 +1324,7 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     {
                         alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
                         "Check name of group or existence", "RollInfo Error!", true)
-                        Error.runtimeError(101, "Exit Script");
+                        Error.runtimeError(101, "Exit Script");                      
                     }
     
                     var rollInfo = new File(pathF + ".xml");
