@@ -927,6 +927,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                 var numElements;
                 var roll;
                 var rollCoords;
+                var isRespinRoll;
                 var counter = 0;
                 rollInfoString += "<rolls" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
 
@@ -934,18 +935,19 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                     {
                         rollCoords = []
                         roll = _rollInfoData[prop][i];
-                        numElements = rollName == G_PARAMS.defaultRespinGroupName ? 1 : roll.length;
+                        isRespinRoll = rollName.search(G_PARAMS.defaultRespinGroupName) > -1;
+                        numElements = isRespinRoll ? 1 : roll.length;
 
-                        if(numElements % 2 == 0 && rollName != "_RS") 
+                        if(numElements % 2 == 0 && !isRespinRoll) 
                         {
                             strX = roll[(numElements/2)-1].x;
                             strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
                             rollCoords.push([strX, strY])
                         }
-                        else if(rollName != "_RS" && numElements > 1)
+                        else if(!isRespinRoll && numElements > 1)
                         {
                             strX = roll[(numElements-1)/2].x;
-                            strY = 2*Math.round((roll[(numElements/2)-1].y + roll[numElements/2].y)/2)/2;
+                            strY = roll[(numElements-1)/2].y;
                             rollCoords.push([strX, strY])
                         } 
                         else 
@@ -955,8 +957,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                                 strX = roll[j].x;
                                 strY = roll[j].y;
                                 rollCoords.push([strX, strY]);
-                            }
-                                
+                            }                           
                         }
 
                         for(var j = 0; j < rollCoords.length; j++)                       
