@@ -859,6 +859,13 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                         
                         for(var j = 0; rolls.length < rollInfoGroup.layerSets.length;)
                         {
+                            if(j >= rollInfoGroup.layerSets.length) 
+                            {
+                                alert("Error! Can't find " + G_PARAMS.defaultRollGroupName + rollNum + " group!\n" +
+                                "Check naming of group", "Error!", true)
+                                Error.runtimeError(101, "Exit Script");    
+                            }
+
                             if(rollInfoGroup.layerSets[j].name == G_PARAMS.defaultRollGroupName + rollNum) 
                             {
                                 var currentRollGroup = rollInfoGroup.layerSets[j];
@@ -884,6 +891,13 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                                     } 
                                                     
                                 }
+
+                                if(currentRollGroup.artLayers.length != rollCoords.length) 
+                                {
+                                    alert("Warning! Rect count in " + currentRollGroup.name + " does not equal to numElements.\n" +
+                                    "Check numeration in this layer group or delete unnecessary layers", "Warning!")
+                                }
+
                                 rolls.push(rollCoords);
                                 rollCoords = [];
                                 rollNum++; 
@@ -937,6 +951,13 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                         roll = _rollInfoData[prop][i];
                         isRespinRoll = rollName.search(G_PARAMS.defaultRespinGroupName) > -1;
                         numElements = isRespinRoll ? 1 : roll.length;
+
+                        if(roll[numElements-1] == undefined) 
+                        {
+                            alert("Error! Something wrong in " + G_PARAMS.defaultRollGroupName + i + " rects. \n"+
+                            "Check rect start numeration or their existence!", "Error!", true)
+                            Error.runtimeError(101, "Exit Script");    
+                        }
 
                         if(numElements % 2 == 0 && !isRespinRoll) 
                         {
@@ -1298,9 +1319,9 @@ Code for Import https://scriptui.joonas.me — (Triple click to select):
                     "Work with mask: \n" +
                     "Layer with prefix \"mask_\" will be automatically saved as PNG and empty pixels will be added to borders (size of border specified in the start of script)\n\n" +
                     "Work with RollInfo.xml:\n" +
-                    "if you need to export RollInfo.xml, create \"ROLL_INFO\" layer group which contains \"ROLLS_<rollsName>\" groups," +
-                    "each \"ROLLS\" group must contain \"ROLL_<rollNum>\" roll\n" +
-                    "each \"ROLL\" group must contain rect (name of rect - ONLY index number: 0,1,2,3.. etc) which have proper size and coordinates" 
+                    "if you need to export RollInfo.xml, create \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group which contains \"" + G_PARAMS.defaultRollsGroupName + "_<rollsName>\" groups," +
+                    "each \"" + G_PARAMS.defaultRollsGroupName + "\" group must contain \"" + G_PARAMS.defaultRollGroupName + "<rollNum>\" roll\n" +
+                    "each \"" + G_PARAMS.defaultRollGroupName + "\" group must contain rect (name of rect - ONLY index number: 0,1,2,3.. etc) which have proper size and coordinates" 
                 );
             };
 
