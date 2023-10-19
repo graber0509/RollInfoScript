@@ -823,6 +823,10 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
         * @returns {Object_rollInfo} if success - return Object, else - undefined;
         * for example GetRollInfoData(_curDoc).ROLLS_FS[0][0].x show x-coord of 0-0 symbol position in ROLLS_FS rolls;
         */
+        /*
+            © Vitaliy Hizhnyak 
+            19-10-2023
+        */ 
         this.GetRollInfoDataFromLayers = function(_curDoc) 
         {
             var rollInfo = undefined;
@@ -924,6 +928,10 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
         * @param {Object_rollInfo} _rollInfoData Roll info data object
         * @return {string} Roll Info string;
         */
+        /*
+            © Vitaliy Hizhnyak 
+            19-10-2023
+        */ 
         this.GetRollInfoString = function(_curDoc) 
         {
             var tab = "	";
