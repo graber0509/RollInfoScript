@@ -261,6 +261,11 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
          * @type string
          */
         this.defaultRespinGroupName = "_RS";    
+        /**
+         * Default slotfire path
+         * @type string
+         */
+        this.defaultSlotFirePath = " slotfirePath=\"Rolls/slotfire\"";    
     };
 
     var G_PARAMS = new SParams();
@@ -951,6 +956,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                 var rollCoords;
                 var isRespinRoll;
                 var counter = 0;
+
                 rollInfoString += "<rolls" + rollName + " scale=\"1,1\" pos=\"0,0\">\n";
 
                     for(var i = 0; i < _rollInfoData[prop].length; i++) 
@@ -988,7 +994,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                                 rollCoords.push([strX, strY]);
                             }                           
                         }
-
+                        
                         for(var j = 0; j < rollCoords.length; j++)                       
                         {
                             //START OF BUILDING ROLL INFO TEXT LINE
@@ -997,9 +1003,13 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
                             " y=\"" + rollCoords[j][1] + "\"" +
                             " numElements=\"" + numElements + "\"" +
                             " elementSize=\"" + roll[j].width + ","   + roll[j].height + "\"" +
-                            " scissorSize=\"" + roll[j].width*2 + "," + roll[j].height*2 + "\"" +
+                            " scissorSize=\"" + 
+                            (isRespinRoll ? roll[j].width : ((Math.ceil((roll[j].width+(roll[j].width*0.5))/2))*2)) + "," + //x scissorSize
+                            (isRespinRoll ? roll[j].height : ((Math.ceil(roll[j].height*numElements)/2)*2)) + "\"" +        //y scissorSize                                   //y
                             " stopIndex=\"" + (counter+1) + "\"" + 
+                            (isRespinRoll ? "" : G_PARAMS.defaultSlotFirePath)  + 
                             ">\n" 
+                            
                             //END OF ROLL INFO TEXT LINE
                             counter++;
                         }
