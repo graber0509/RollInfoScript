@@ -676,7 +676,7 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
 
                 G_PARAMS.hSt_layerName.text = layerPart.name;
 
-                if (!layerPart.visible || layerPart.parent.name == G_PARAMS.defaultRollInfoGroupName) continue;
+                if (!layerPart.visible || layerPart.name == G_PARAMS.defaultRollInfoGroupName) continue;
 
                 ///// -----  EXIT SCRIPT PART ----- /////
                 if ((layerPart.typename !== "LayerSet") && !CheckStrValidEx(layerPart.name)) {
@@ -1052,10 +1052,12 @@ var C_SCRIPT_VERSION = "3." + C_CONVERTER_VERSION + ".0";
             if (G_PARAMS.m_isRollInfo) {
                 G_PARAMS.rolls = this.GetRollInfoString(G_PARAMS.curDoc);
                 if(G_PARAMS.rolls == undefined) 
+                {
                     alert("Error! \"" + G_PARAMS.defaultRollInfoGroupName + "\" layer group not found!\n" +  
                     "Check name of group or existence\n" +
                     "or uncheck RollInfo.xml export", "RollInfo Error!", true)
                     Error.runtimeError(101, "Exit Script");
+                }
             }
             //TODO: need calculate and add size
             G_PARAMS.positions = "<head type=\"" + C_TYPE + "\" version=\"" + C_CONVERTER_VERSION + "\" />\n";
